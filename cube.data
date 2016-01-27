@@ -28,8 +28,8 @@ f  2//1  8//1  4//1
 
 # Each row gives us the 3 rgb values for each vertex of the triangle specified by the corresponding face
 
-c 136 230 0 136 230 0 136 230 0
-c 136 230 0 136 230 0 136 230 0
+c 179 89 0 179 89 0 179 89 0
+c 179 89 0 179 89 0 179 89 0
 c 128 63 0 128 63 0 128 63 0
 c 128 63 0 128 63 0 128 63 0
 c 136 230 0 136 230 0 136 230 0

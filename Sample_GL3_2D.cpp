@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <cmath> 
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -452,14 +453,23 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 	}
 }
 
+float eye_x,eye_y,eye_z;
+int left_mouse_clicked;
+
 /* Executed when a mouse button is pressed/released */
 void mouseButton (GLFWwindow* window, int button, int action, int mods)
 {
 	switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
-			if (action == GLFW_RELEASE)
+			if (action == GLFW_PRESS){
+				left_mouse_clicked=1;
+				break;
+			}
+			if (action == GLFW_RELEASE){
 				triangle_rot_dir *= -1;
-			break;
+				left_mouse_clicked=0;
+				break;
+			}
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			if (action == GLFW_RELEASE) {
 				rectangle_rot_dir *= -1;
@@ -494,7 +504,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, 0.1f, 1000.0f);
+	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, 0.1f, 5000.0f);
 }
 
 VAO *triangle, *rectangle;
@@ -663,11 +673,23 @@ void createModel (string name, float x_pos, float y_pos, float z_pos, float x_sc
 float camera_rotation_angle = 90;
 float rectangle_rotation = 0;
 float triangle_rotation = 0;
+double prev_mouse_x;
+double prev_mouse_y;
+float angle=0;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
-void draw ()
+void draw (GLFWwindow* window)
 {
+	double new_mouse_x,new_mouse_y;
+	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
+	if(left_mouse_clicked==1){
+		angle+=0.01;
+		eye_x = 400*cos(angle);
+    	eye_z = 400*sin(angle);
+	}
+	prev_mouse_x=new_mouse_x;
+	prev_mouse_y=new_mouse_y;
 	// clear the color and depth in the frame buffer
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -676,7 +698,7 @@ void draw ()
 	glUseProgram (programID);
 
 	// Eye - Location of camera. Don't change unless you are sure!!
-	glm::vec3 eye (400, 300, 400);
+	glm::vec3 eye (eye_x, eye_y, eye_z);
 	// Target - Where is the camera looking at.  Don't change unless you are sure!!
 	glm::vec3 target (0, 0, 0);
 	// Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -884,7 +906,7 @@ void initGL (GLFWwindow* window, int width, int height)
 				if(gameMapPebbles[i][j]==2){
 					string new_name="stone";
 					new_name.append(name);
-					createModel (new_name,(j-5)*50+60,gameMap[i][j]*50/2+(gameMap[i][j]-1)*50/2+87,(i-5)*50+60,120,120,120,"stone.data");
+					createModel (new_name,(j-5)*50+65,gameMap[i][j]*50/2+(gameMap[i][j]-1)*50/2+87,(i-5)*50+60,120,120,120,"stone.data");
 				}
 			}
 		}
@@ -945,6 +967,9 @@ int main (int argc, char** argv)
 {
 	int width = 600;
 	int height = 600;
+	eye_x=400;
+	eye_y=300;
+	eye_z=-400;
 
 	GLFWwindow* window = initGLFW(width, height);
 
@@ -956,7 +981,7 @@ int main (int argc, char** argv)
 	while (!glfwWindowShouldClose(window)) {
 
 		// OpenGL Draw commands
-		draw();
+		draw(window);
 
 		// Swap Frame Buffer in double buffering
 		glfwSwapBuffers(window);
