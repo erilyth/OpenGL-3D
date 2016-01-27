@@ -513,7 +513,6 @@ void createModel (string filename) //Create object from blender
     GLfloat color_buffer_data [100000] = {
     };
     vector<Point> points;
-    vector<COLOR> point_color;
     int len=0;
     string line;
     float a,b,c;
@@ -528,18 +527,13 @@ void createModel (string filename) //Create object from blender
                 cur_point.x=a;
                 cur_point.y=b;
                 cur_point.z=c;
-                COLOR cur_color = {};
-                cur_color.r=1;
-                cur_color.g=0;
-                cur_color.b=0;
                 points.push_back(cur_point);
-                point_color.push_back(cur_color);
             }
         }
         myfile.close();
     }
     int t[3],temp;
-    int bcount=0;
+    int bcount=0,ccount=0;
     myfile.open(filename.c_str());
     if (myfile.is_open()){
         while (myfile >> line){
@@ -575,21 +569,26 @@ void createModel (string filename) //Create object from blender
                 vertex_buffer_data[bcount+6]=points[my_triangle.p3].x;
                 vertex_buffer_data[bcount+7]=points[my_triangle.p3].y;
                 vertex_buffer_data[bcount+8]=points[my_triangle.p3].z;
-                color_buffer_data[bcount]=0.0;
-                color_buffer_data[bcount+1]=1.0;
-                color_buffer_data[bcount+2]=0.0;
-                color_buffer_data[bcount+3]=0.0;
-                color_buffer_data[bcount+4]=1.0;
-                color_buffer_data[bcount+5]=0.0;
-                color_buffer_data[bcount+6]=0.0;
-                color_buffer_data[bcount+7]=1.0;
-                color_buffer_data[bcount+8]=0.0;
                 bcount+=9;
+            }
+            if(line.length()==1 && line[0]=='c'){
+                float r1,g1,b1,r2,g2,b2,r3,g3,b3;
+                myfile >> r1 >> g1 >> b1 >> r2 >> g2 >> b2 >> r3 >> g3 >> b3;       
+                color_buffer_data[ccount]=r1/255.0;
+                color_buffer_data[ccount+1]=g1/255.0;
+                color_buffer_data[ccount+2]=b1/255.0;
+                color_buffer_data[ccount+3]=r2/255.0;
+                color_buffer_data[ccount+4]=g2/255.0;
+                color_buffer_data[ccount+5]=b2/255.0;
+                color_buffer_data[ccount+6]=r3/255.0;
+                color_buffer_data[ccount+7]=g3/255.0;
+                color_buffer_data[ccount+8]=b3/255.0;
+                ccount+=9;
             }
         }
         myfile.close();
     }
-    myobject = create3DObject(GL_TRIANGLES, bcount/3, vertex_buffer_data, color_buffer_data, GL_LINE);
+    myobject = create3DObject(GL_TRIANGLES, bcount/3, vertex_buffer_data, color_buffer_data, GL_FILL);
 }
 
 float camera_rotation_angle = 90;
