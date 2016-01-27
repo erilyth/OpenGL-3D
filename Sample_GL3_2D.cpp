@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <string>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -86,6 +87,20 @@ struct Sprite {
 typedef struct Sprite Sprite;
 
 map <string, Sprite> objects;
+
+int gameMap[10][10]={
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,2,1,1,1,1,1,1},
+	{1,2,1,2,1,1,1,1,1,1},
+	{1,2,1,1,2,2,2,2,2,2},
+	{1,1,2,1,1,2,1,1,1,2},
+	{1,1,2,1,1,1,1,1,1,2},
+	{1,1,1,2,1,1,1,1,1,2},
+	{1,1,1,1,2,1,1,1,1,1},
+	{1,1,1,1,1,2,2,2,2,2},
+	{1,1,1,1,1,1,1,1,1,1}
+};
+
 
 GLuint programID, fontProgramID, textureProgramID;
 
@@ -648,7 +663,7 @@ void draw ()
 	glUseProgram (programID);
 
 	// Eye - Location of camera. Don't change unless you are sure!!
-	glm::vec3 eye (-400, 300, -400);
+	glm::vec3 eye (400, 300, 400);
 	// Target - Where is the camera looking at.  Don't change unless you are sure!!
 	glm::vec3 target (0, 0, 0);
 	// Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -683,7 +698,7 @@ void draw ()
         Matrices.model = glm::mat4(1.0f);
 
         glm::mat4 ObjectTransform;
-        glm::mat4 rotateObject = glm::rotate((float)((fontScale)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        glm::mat4 rotateObject = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
         glm::mat4 translateToCenter = glm::translate (glm::vec3(-objects[current].x_scale/2,-objects[current].y_scale/2, -objects[current].z_scale/2));
         glm::mat4 translateObject = glm::translate (glm::vec3(objects[current].x, objects[current].y, objects[current].z)); // glTranslatef
         ObjectTransform=translateObject*rotateObject*translateToCenter;
@@ -804,6 +819,22 @@ GLFWwindow* initGLFW (int width, int height)
 	return window;
 }
 
+string convertInt(int number)
+{
+    if (number == 0)
+        return "0";
+    string temp="";
+    string returnvalue="";
+    while (number>0)
+    {
+        temp+=number%10+48;
+        number/=10;
+    }
+    for (int i=0;i<temp.length();i++)
+        returnvalue+=temp[temp.length()-i-1];
+    return returnvalue;
+}
+
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
 void initGL (GLFWwindow* window, int width, int height)
@@ -828,8 +859,18 @@ void initGL (GLFWwindow* window, int width, int height)
 	// Create the models
 	createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
 	createRectangle (textureID);
-	createModel ("maincube",0,0,0,20,20,20,"cube.obj");
 
+
+	int i,j,k;
+	for(i=0;i<10;i++){
+		for(j=0;j<10;j++){
+			if(gameMap[i][j]!=0){
+				string name = "floorcube";
+				name.append(convertInt(i)+convertInt(j));
+				createModel (name,(j-5)*50,gameMap[i][j]*50/2,(i-5)*50,50,gameMap[i][j]*50,50,"cube.data");
+			}
+		}
+	}
 
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
