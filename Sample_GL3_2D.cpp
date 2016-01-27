@@ -2,6 +2,7 @@
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <map>
 
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
@@ -60,6 +61,31 @@ typedef struct Triangle {
     int p3; //Indices of the points corresponding to the triangle
 } Triangle;
 
+struct Sprite {
+    string name;
+    float x,y,z;
+    VAO* object;
+    int status;
+    float x_scale,y_scale,z_scale;
+    float x_speed,y_speed;
+    float angle; //Current Angle (Actual rotated angle of the object)
+    int inAir;
+    float radius;
+    int fixed;
+    float friction; //Value from 0 to 1
+    int health;
+    int isRotating;
+    int direction; //0 for clockwise and 1 for anticlockwise for animation
+    float remAngle; //the remaining angle to finish animation
+    int isMovingAnim;
+    int dx;
+    int dy;
+    int dz;
+    float weight;
+};
+typedef struct Sprite Sprite;
+
+map <string, Sprite> objects;
 
 GLuint programID, fontProgramID, textureProgramID;
 
@@ -440,10 +466,10 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-4.0f, 4.0f, -4.0f, 4.0f, 0.1f, 500.0f);
+	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, 0.1f, 1000.0f);
 }
 
-VAO *triangle, *rectangle,  *myobject;
+VAO *triangle, *rectangle;
 
 // Creates the triangle object used in this sample code
 void createTriangle ()
@@ -472,13 +498,13 @@ void createRectangle (GLuint textureID)
 {
 	// GL3 accepts only Triangles. Quads are not supported
 	static const GLfloat vertex_buffer_data [] = {
-		-1.2,-1,0, // vertex 1
-		1.2,-1,0, // vertex 2
-		1.2, 1,0, // vertex 3
+		-140,-100,0, // vertex 1
+		140,-100,0, // vertex 2
+		140, 100,0, // vertex 3
 
-		1.2, 1,0, // vertex 3
-		-1.2, 1,0, // vertex 4
-		-1.2,-1,0  // vertex 1
+		140, 100,0, // vertex 3
+		-140, 100,0, // vertex 4
+		-140,-100,0  // vertex 1
 	};
 
 	static const GLfloat color_buffer_data [] = {
@@ -506,7 +532,7 @@ void createRectangle (GLuint textureID)
 	rectangle = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
 }
 
-void createModel (string filename) //Create object from blender
+void createModel (string name, float x_pos, float y_pos, float z_pos, float x_scale, float y_scale, float z_scale, string filename) //Create object from blender
 {
     GLfloat vertex_buffer_data [100000] = {
     };
@@ -560,15 +586,15 @@ void createModel (string filename) //Create object from blender
                 my_triangle.p1=t[0]-1;
                 my_triangle.p2=t[1]-1;
                 my_triangle.p3=t[2]-1;
-                vertex_buffer_data[bcount]=points[my_triangle.p1].x;
-                vertex_buffer_data[bcount+1]=points[my_triangle.p1].y;
-                vertex_buffer_data[bcount+2]=points[my_triangle.p1].z;
-                vertex_buffer_data[bcount+3]=points[my_triangle.p2].x;
-                vertex_buffer_data[bcount+4]=points[my_triangle.p2].y;
-                vertex_buffer_data[bcount+5]=points[my_triangle.p2].z;
-                vertex_buffer_data[bcount+6]=points[my_triangle.p3].x;
-                vertex_buffer_data[bcount+7]=points[my_triangle.p3].y;
-                vertex_buffer_data[bcount+8]=points[my_triangle.p3].z;
+                vertex_buffer_data[bcount]=points[my_triangle.p1].x*x_scale;
+                vertex_buffer_data[bcount+1]=points[my_triangle.p1].y*y_scale;
+                vertex_buffer_data[bcount+2]=points[my_triangle.p1].z*z_scale;
+                vertex_buffer_data[bcount+3]=points[my_triangle.p2].x*x_scale;
+                vertex_buffer_data[bcount+4]=points[my_triangle.p2].y*y_scale;
+                vertex_buffer_data[bcount+5]=points[my_triangle.p2].z*z_scale;
+                vertex_buffer_data[bcount+6]=points[my_triangle.p3].x*x_scale;
+                vertex_buffer_data[bcount+7]=points[my_triangle.p3].y*y_scale;
+                vertex_buffer_data[bcount+8]=points[my_triangle.p3].z*z_scale;
                 bcount+=9;
             }
             if(line.length()==1 && line[0]=='c'){
@@ -588,7 +614,22 @@ void createModel (string filename) //Create object from blender
         }
         myfile.close();
     }
-    myobject = create3DObject(GL_TRIANGLES, bcount/3, vertex_buffer_data, color_buffer_data, GL_FILL);
+    VAO* myobject = create3DObject(GL_TRIANGLES, bcount/3, vertex_buffer_data, color_buffer_data, GL_FILL);
+    Sprite vishsprite = {};
+    vishsprite.name = name;
+    vishsprite.object = myobject;
+    vishsprite.x=x_pos;
+    vishsprite.y=y_pos;
+    vishsprite.z=z_pos;
+    vishsprite.status=1;
+    vishsprite.fixed=0;
+    vishsprite.friction=0.4;
+    vishsprite.health=100;
+    vishsprite.weight=5;
+    vishsprite.x_scale=x_scale;
+    vishsprite.y_scale=y_scale;
+    vishsprite.z_scale=z_scale;
+    objects[name]=vishsprite;
 }
 
 float camera_rotation_angle = 90;
@@ -607,7 +648,7 @@ void draw ()
 	glUseProgram (programID);
 
 	// Eye - Location of camera. Don't change unless you are sure!!
-	glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+	glm::vec3 eye (-400, 300, -400);
 	// Target - Where is the camera looking at.  Don't change unless you are sure!!
 	glm::vec3 target (0, 0, 0);
 	// Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
@@ -618,8 +659,8 @@ void draw ()
 	//  Don't change unless you are sure!!
 	static float c = 0;
 	c++;
-	Matrices.view = glm::lookAt(eye, glm::vec3(1,1,1), glm::vec3(sinf(c*M_PI/180.0),3*cosf(c*M_PI/180.0),0)); // Fixed camera for 2D (ortho) in XY plane
-
+	//Matrices.view = glm::lookAt(glm::vec3(0,0,10), glm::vec3(0,0,0), glm::vec3(sinf(c*M_PI/180.0),3*cosf(c*M_PI/180.0),0)); // Fixed camera for 2D (ortho) in XY plane
+	Matrices.view = glm::lookAt(eye, target, up); // Fixed camera for 2D (ortho) in XY plane
 	// Compute ViewProject matrix as view/camera might not be changed for this frame (basic scenario)
 	//  Don't change unless you are sure!!
 	glm::mat4 VP = Matrices.projection * Matrices.view;
@@ -628,24 +669,32 @@ void draw ()
 	// For each model you render, since the MVP will be different (at least the M part)
 	//  Don't change unless you are sure!!
 	glm::mat4 MVP;	// MVP = Projection * View * Model
+	static int fontScale = 0;
 
-	// Load identity to model matrix
-	Matrices.model = glm::mat4(1.0f);
 
-	/* Render your scene */
-	glm::mat4 translateTriangle = glm::translate (glm::vec3(-2.0f, 0.0f, 0.0f)); // glTranslatef
-	glm::mat4 rotateTriangle = glm::rotate((float)(triangle_rotation*M_PI/180.0f), glm::vec3(0,0,1));  // rotate about vector (1,0,0)
-	glm::mat4 triangleTransform = translateTriangle * rotateTriangle;
-	Matrices.model *= triangleTransform;
-	MVP = VP * Matrices.model; // MVP = p * V * M
 
-	//  Don't change unless you are sure!!
-	// Copy MVP to normal shaders
-	glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+	//Draw the objects
+    for(map<string,Sprite>::iterator it=objects.begin();it!=objects.end();it++){
+        string current = it->first; //The name of the current object
+        if(objects[current].status==0)
+            continue;
+        glm::mat4 MVP;  // MVP = Projection * View * Model
 
-	// draw3DObject draws the VAO given to it using current MVP matrix
-	draw3DObject(triangle);
-	draw3DObject(myobject);
+        Matrices.model = glm::mat4(1.0f);
+
+        glm::mat4 ObjectTransform;
+        glm::mat4 rotateObject = glm::rotate((float)((fontScale)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        glm::mat4 translateToCenter = glm::translate (glm::vec3(-objects[current].x_scale/2,-objects[current].y_scale/2, -objects[current].z_scale/2));
+        glm::mat4 translateObject = glm::translate (glm::vec3(objects[current].x, objects[current].y, objects[current].z)); // glTranslatef
+        ObjectTransform=translateObject*rotateObject*translateToCenter;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+        
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(objects[current].object);
+        //glPopMatrix (); 
+    }
 
 
 
@@ -668,17 +717,16 @@ void draw ()
 	glUniform1i(glGetUniformLocation(textureProgramID, "texSampler"), 0);
 
 	// draw3DObject draws the VAO given to it using current MVP matrix
-	draw3DTexturedObject(rectangle);
+	//draw3DTexturedObject(rectangle);
+
+
 
 	// Increment angles
-	float increments = 1;
+	float increments = 0;
 
 	// Render font on screen
-	static int fontScale = 0;
 	float fontScaleValue = 0.75 + 0.25*sinf(fontScale*M_PI/180.0f);
 	glm::vec3 fontColor = getRGBfromHue (fontScale);
-
-
 
 	// Use font Shaders for next part of code
 	glUseProgram(fontProgramID);
@@ -696,6 +744,8 @@ void draw ()
 
 	// Render font
 	GL3Font.font->Render("Round n Round we go !!");
+
+
 
 
 	//camera_rotation_angle++; // Simulating camera rotation
@@ -778,7 +828,7 @@ void initGL (GLFWwindow* window, int width, int height)
 	// Create the models
 	createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
 	createRectangle (textureID);
-	createModel ("cube.obj");
+	createModel ("maincube",0,0,0,20,20,20,"cube.obj");
 
 
 	// Create and compile our GLSL program from the shaders
