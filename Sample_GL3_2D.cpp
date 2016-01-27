@@ -101,6 +101,19 @@ int gameMap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1}
 };
 
+int gameMapPebbles[10][10]={
+	{2,1,1,2,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,2,1,1,1,1,1,1},
+	{1,1,1,1,1,2,1,1,2,1},
+	{1,1,1,1,1,1,1,1,1,2},
+	{1,1,2,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,2,1,2},
+	{1,1,1,2,1,1,1,1,1,1}	
+};
+
 
 GLuint programID, fontProgramID, textureProgramID;
 
@@ -868,6 +881,11 @@ void initGL (GLFWwindow* window, int width, int height)
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j));
 				createModel (name,(j-5)*50,gameMap[i][j]*50/2,(i-5)*50,50,gameMap[i][j]*50,50,"cube.data");
+				if(gameMapPebbles[i][j]==2){
+					string new_name="stone";
+					new_name.append(name);
+					createModel (new_name,(j-5)*50+60,gameMap[i][j]*50/2+(gameMap[i][j]-1)*50/2+87,(i-5)*50+60,120,120,120,"stone.data");
+				}
 			}
 		}
 	}
