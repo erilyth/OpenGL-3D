@@ -735,14 +735,18 @@ void draw (GLFWwindow* window)
 	if(player_moving==1 || player_moving==-1){ //The player is not stationary
 		if(playerObjects["playerhand"].direction_x==0){
 			playerObjects["playerhand"].angle_x+=2;
+			playerObjects["playerleg"].angle_x-=1.4;
 			playerObjects["playerhand2"].angle_x-=2;
+			playerObjects["playerleg2"].angle_x+=1.4;
 			if(playerObjects["playerhand"].angle_x>=45){
 				playerObjects["playerhand"].direction_x=1;
 			}
 		}
 		if(playerObjects["playerhand"].direction_x==1){
 			playerObjects["playerhand"].angle_x-=2;
+			playerObjects["playerleg"].angle_x+=1.4;
 			playerObjects["playerhand2"].angle_x+=2;
+			playerObjects["playerleg2"].angle_x-=1.4;
 			if(playerObjects["playerhand"].angle_x<=-45){
 				playerObjects["playerhand"].direction_x=0;
 			}
@@ -751,11 +755,19 @@ void draw (GLFWwindow* window)
 	else{
 		playerObjects["playerhand"].angle_x-=playerObjects["playerhand"].angle_x/4;
 		playerObjects["playerhand2"].angle_x-=playerObjects["playerhand2"].angle_x/4;
+		playerObjects["playerleg"].angle_x-=playerObjects["playerleg"].angle_x/4;
+		playerObjects["playerleg2"].angle_x-=playerObjects["playerleg2"].angle_x/4;
 		if(playerObjects["playerhand"].angle_x<10 && playerObjects["playerhand"].angle_x>-10){
 			playerObjects["playerhand"].angle_x=0;
 		}
 		if(playerObjects["playerhand2"].angle_x<10 && playerObjects["playerhand2"].angle_x>-10){
 			playerObjects["playerhand2"].angle_x=0;
+		}
+		if(playerObjects["playerleg2"].angle_x<10 && playerObjects["playerleg2"].angle_x>-10){
+			playerObjects["playerleg2"].angle_x=0;
+		}
+		if(playerObjects["playerleg"].angle_x<10 && playerObjects["playerleg"].angle_x>-10){
+			playerObjects["playerleg"].angle_x=0;
 		}
 	}
 	double new_mouse_x,new_mouse_y;
@@ -1030,11 +1042,16 @@ void initGL (GLFWwindow* window, int width, int height)
 		}
 	}
 
-	createModel("player",0,200,50,50,50,50,"cube.data","");
+	createModel("player",0,200,50,60,60,40,"cube.data",""); //The player's body
+	createModel("playerhead",0,55,0,50,50,50,"cube.data","player");
 	createModel("playerhand",45,0,0,30,60,30,"cube.data","player");
 	createModel("playerhand2",-45,0,0,30,60,30,"cube.data","player");
+	createModel("playerleg",15,-55,0,30,60,30,"cube.data","player");
+	createModel("playerleg2",-15,-55,0,30,60,30,"cube.data","player");
 	playerObjects["playerhand"].rotation_y_offset=-30; //So that the rotation of the hand swinging is done on the top of the hand
 	playerObjects["playerhand2"].rotation_y_offset=-30;
+	playerObjects["playerleg"].rotation_y_offset=-30;
+	playerObjects["playerleg2"].rotation_y_offset=-30;
 
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
