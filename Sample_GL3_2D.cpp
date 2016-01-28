@@ -538,7 +538,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, 0.1f, 5000.0f);
+	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, -1000.0f, 5000.0f);
 }
 
 VAO *triangle, *rectangle;
@@ -1043,7 +1043,7 @@ void initGL (GLFWwindow* window, int width, int height)
 	}
 
 	createModel("player",0,200,50,60,60,40,"cube.data",""); //The player's body
-	createModel("playerhead",0,55,0,50,50,50,"cube.data","player");
+	createModel("playerhead",0,60,0,28,28,28,"head.data","player");
 	createModel("playerhand",45,0,0,30,60,30,"cube.data","player");
 	createModel("playerhand2",-45,0,0,30,60,30,"cube.data","player");
 	createModel("playerleg",15,-55,0,30,60,30,"cube.data","player");
