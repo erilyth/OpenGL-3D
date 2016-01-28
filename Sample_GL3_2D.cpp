@@ -88,6 +88,7 @@ struct Sprite {
 typedef struct Sprite Sprite;
 
 map <string, Sprite> objects;
+map <string, Sprite> playerObjects;
 
 int gameMap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1},
@@ -570,7 +571,7 @@ void createRectangle (GLuint textureID)
 	rectangle = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
 }
 
-void createModel (string name, float x_pos, float y_pos, float z_pos, float x_scale, float y_scale, float z_scale, string filename) //Create object from blender
+void createModel (string name, float x_pos, float y_pos, float z_pos, float x_scale, float y_scale, float z_scale, string filename, string layer) //Create object from blender
 {
     GLfloat vertex_buffer_data [100000] = {
     };
@@ -667,7 +668,10 @@ void createModel (string name, float x_pos, float y_pos, float z_pos, float x_sc
     vishsprite.x_scale=x_scale;
     vishsprite.y_scale=y_scale;
     vishsprite.z_scale=z_scale;
-    objects[name]=vishsprite;
+    if(layer=="player")
+    	playerObjects[name]=vishsprite;
+    else
+    	objects[name]=vishsprite;
 }
 
 float camera_rotation_angle = 90;
@@ -734,15 +738,39 @@ void draw (GLFWwindow* window)
 
         glm::mat4 ObjectTransform;
         glm::mat4 rotateObject = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
-        glm::mat4 translateToCenter = glm::translate (glm::vec3(-objects[current].x_scale/2,-objects[current].y_scale/2, -objects[current].z_scale/2));
         glm::mat4 translateObject = glm::translate (glm::vec3(objects[current].x, objects[current].y, objects[current].z)); // glTranslatef
-        ObjectTransform=translateObject*rotateObject*translateToCenter;
+        ObjectTransform=translateObject*rotateObject;
         Matrices.model *= ObjectTransform;
         MVP = VP * Matrices.model; // MVP = p * V * M
         
         glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
         draw3DObject(objects[current].object);
+        //glPopMatrix (); 
+    }
+
+
+    //Draw the player
+    for(map<string,Sprite>::iterator it=playerObjects.begin();it!=playerObjects.end();it++){
+        string current = it->first; //The name of the current object
+        if(playerObjects[current].status==0)
+            continue;
+        glm::mat4 MVP;  // MVP = Projection * View * Model
+
+        Matrices.model = glm::mat4(1.0f);
+
+        glm::mat4 ObjectTransform;
+        glm::mat4 rotateObject = glm::rotate((float)((fontScale)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        glm::mat4 translateRelative = glm::translate (glm::vec3(playerObjects[current].x,playerObjects[current].y,playerObjects[current].z));
+        glm::mat4 translateRelativeBack = glm::translate (glm::vec3(-playerObjects[current].x,-playerObjects[current].y,-playerObjects[current].z));
+        glm::mat4 translateObject = glm::translate (glm::vec3(playerObjects[current].x+objects["player"].x, playerObjects[current].y+objects["player"].y, playerObjects[current].z+objects["player"].z)); // glTranslatef
+        ObjectTransform=translateObject*translateRelativeBack*rotateObject*translateRelative;
+        Matrices.model *= ObjectTransform;
+        MVP = VP * Matrices.model; // MVP = p * V * M
+        
+        glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
+
+        draw3DObject(playerObjects[current].object);
         //glPopMatrix (); 
     }
 
@@ -902,15 +930,18 @@ void initGL (GLFWwindow* window, int width, int height)
 			if(gameMap[i][j]!=0){
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j));
-				createModel (name,(j-5)*50,gameMap[i][j]*50/2,(i-5)*50,50,gameMap[i][j]*50,50,"cube.data");
+				createModel (name,(j-5)*50,gameMap[i][j]*50/2,(i-5)*50,50,gameMap[i][j]*50,50,"cube.data","");
 				if(gameMapPebbles[i][j]==2){
 					string new_name="stone";
 					new_name.append(name);
-					createModel (new_name,(j-5)*50+65,gameMap[i][j]*50/2+(gameMap[i][j]-1)*50/2+87,(i-5)*50+60,120,120,120,"stone.data");
+					createModel (new_name,(j-5)*50,(gameMap[i][j]-1)*50+50,(i-5)*50,120,120,120,"stone.data","");
 				}
 			}
 		}
 	}
+
+	createModel("player",0,200,50,50,50,50,"cube.data","");
+	createModel("playerhand",50,0,0,50,50,50,"cube.data","player");
 
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
