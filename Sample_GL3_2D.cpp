@@ -538,7 +538,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-400.0f, 400.0f, -400.0f, 400.0f, -1000.0f, 5000.0f);
+	Matrices.projection = glm::ortho(-900.0f, 900.0f, -900.0f, 900.0f, -1000.0f, 5000.0f);
 }
 
 VAO *triangle, *rectangle;
@@ -707,6 +707,22 @@ void createModel (string name, float x_pos, float y_pos, float z_pos, float x_sc
     	objects[name]=vishsprite;
 }
 
+string convertInt(int number)
+{
+    if (number == 0)
+        return "0";
+    string temp="";
+    string returnvalue="";
+    while (number>0)
+    {
+        temp+=number%10+48;
+        number/=10;
+    }
+    for (int i=0;i<temp.length();i++)
+        returnvalue+=temp[temp.length()-i-1];
+    return returnvalue;
+}
+
 float camera_rotation_angle = 90;
 float rectangle_rotation = 0;
 float triangle_rotation = 0;
@@ -714,25 +730,43 @@ double prev_mouse_x;
 double prev_mouse_y;
 float angle=0;
 
+//Only checks collision on the x and z axes. Not the y axis as of now.
+int check_collision(){
+	int collided=0,i,j;
+	for(i=0;i<10;i++){
+		for(j=0;j<10;j++){
+			if(gameMap[i][j]==2){
+				string name = "floorcube";
+				name.append(convertInt(i)+convertInt(j));
+				if(objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20){
+					collided=1;
+				}
+			}
+		}
+	}
+	return collided;
+}
+
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
-	if(player_rotating==1){
-		objects["player"].angle_y-=2;
+	if(player_rotating!=0){
+		objects["player"].angle_y-=player_rotating*2;
 	}
-	if(player_rotating==-1){
-		objects["player"].angle_y+=2;
+	if(player_moving!=0){
+		objects["player"].z+=player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+		if(check_collision()==1){
+			objects["player"].z-=player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+		}
 	}
-	if(player_moving==1){
-		objects["player"].z+=cos(objects["player"].angle_y*M_PI/180)*2;
-		objects["player"].x+=sin(objects["player"].angle_y*M_PI/180)*2;
+	if(player_moving!=0){
+		objects["player"].x+=player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+		if(check_collision()==1){
+			objects["player"].x-=player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+		}
 	}
-	if(player_moving==-1){
-		objects["player"].z-=cos(objects["player"].angle_y*M_PI/180)*2;
-		objects["player"].x-=sin(objects["player"].angle_y*M_PI/180)*2;
-	}
-	if(player_moving==1 || player_moving==-1){ //The player is not stationary
+	if(player_moving!=0){ //The player is not stationary
 		if(playerObjects["playerhand"].direction_x==0){
 			playerObjects["playerhand"].angle_x+=2;
 			playerObjects["playerleg"].angle_x-=1.4;
@@ -752,7 +786,7 @@ void draw (GLFWwindow* window)
 			}
 		}
 	}
-	else{
+	else{ //Stop the player movement slowly
 		playerObjects["playerhand"].angle_x-=playerObjects["playerhand"].angle_x/4;
 		playerObjects["playerhand2"].angle_x-=playerObjects["playerhand2"].angle_x/4;
 		playerObjects["playerleg"].angle_x-=playerObjects["playerleg"].angle_x/4;
@@ -984,22 +1018,6 @@ GLFWwindow* initGLFW (int width, int height)
 	return window;
 }
 
-string convertInt(int number)
-{
-    if (number == 0)
-        return "0";
-    string temp="";
-    string returnvalue="";
-    while (number>0)
-    {
-        temp+=number%10+48;
-        number/=10;
-    }
-    for (int i=0;i<temp.length();i++)
-        returnvalue+=temp[temp.length()-i-1];
-    return returnvalue;
-}
-
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
 void initGL (GLFWwindow* window, int width, int height)
@@ -1025,6 +1043,7 @@ void initGL (GLFWwindow* window, int width, int height)
 	createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
 	createRectangle (textureID);
 
+	float scale=0.7;
 
 	int i,j,k;
 	for(i=0;i<10;i++){
@@ -1032,26 +1051,26 @@ void initGL (GLFWwindow* window, int width, int height)
 			if(gameMap[i][j]!=0){
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j));
-				createModel (name,(j-5)*50,gameMap[i][j]*50/2,(i-5)*50,50,gameMap[i][j]*50,50,"cube.data","");
+				createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
 				if(gameMapPebbles[i][j]==2){
 					string new_name="stone";
 					new_name.append(name);
-					createModel (new_name,(j-5)*50,(gameMap[i][j]-1)*50+50,(i-5)*50,120,120,120,"stone.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j]-1)*150+153,(i-5)*150,200,200,200,"stone.data","");
 				}
 			}
 		}
 	}
 
-	createModel("player",0,200,50,63,60,42,"body.data",""); //The player's body
-	createModel("playerhead",0,60,0,28,28,28,"head.data","player");
-	createModel("playerhand",49,-2,0,16,32,16,"hand.data","player");
-	createModel("playerhand2",-49,-2,0,16,32,16,"hand.data","player");
-	createModel("playerleg",15,-68,0,15,48,15,"leg.data","player");
-	createModel("playerleg2",-15,-68,0,15,48,15,"leg.data","player");
-	playerObjects["playerhand"].rotation_y_offset=-30; //So that the rotation of the hand swinging is done on the top of the hand
-	playerObjects["playerhand2"].rotation_y_offset=-30;
-	playerObjects["playerleg"].rotation_y_offset=-30;
-	playerObjects["playerleg2"].rotation_y_offset=-30;
+	createModel("player",0,230,100,63*scale,60*scale,42*scale,"body.data",""); //The player's body
+	createModel("playerhead",0,60*scale,0,28*scale,28*scale,28*scale,"head.data","player");
+	createModel("playerhand",49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
+	createModel("playerhand2",-49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
+	createModel("playerleg",15*scale,-68*scale,0,15*scale,48*scale,15*scale,"leg.data","player");
+	createModel("playerleg2",-15*scale,-68*scale,0,15*scale,48*scale,15*scale,"leg.data","player");
+	playerObjects["playerhand"].rotation_y_offset=-30*scale; //So that the rotation of the hand swinging is done on the top of the hand
+	playerObjects["playerhand2"].rotation_y_offset=-30*scale;
+	playerObjects["playerleg"].rotation_y_offset=-30*scale;
+	playerObjects["playerleg2"].rotation_y_offset=-30*scale;
 
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
@@ -1106,8 +1125,8 @@ void initGL (GLFWwindow* window, int width, int height)
 
 int main (int argc, char** argv)
 {
-	int width = 600;
-	int height = 600;
+	int width = 700;
+	int height = 700;
 	eye_x=400;
 	eye_y=300;
 	eye_z=-400;
