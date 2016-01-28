@@ -1042,12 +1042,12 @@ void initGL (GLFWwindow* window, int width, int height)
 		}
 	}
 
-	createModel("player",0,200,50,62,60,40,"body.data",""); //The player's body
+	createModel("player",0,200,50,63,60,42,"body.data",""); //The player's body
 	createModel("playerhead",0,60,0,28,28,28,"head.data","player");
 	createModel("playerhand",49,-2,0,16,32,16,"hand.data","player");
 	createModel("playerhand2",-49,-2,0,16,32,16,"hand.data","player");
-	createModel("playerleg",15,-58,0,30,74,30,"cube.data","player");
-	createModel("playerleg2",-15,-58,0,30,74,30,"cube.data","player");
+	createModel("playerleg",15,-68,0,15,48,15,"leg.data","player");
+	createModel("playerleg2",-15,-68,0,15,48,15,"leg.data","player");
 	playerObjects["playerhand"].rotation_y_offset=-30; //So that the rotation of the hand swinging is done on the top of the hand
 	playerObjects["playerhand2"].rotation_y_offset=-30;
 	playerObjects["playerleg"].rotation_y_offset=-30;
@@ -1109,7 +1109,7 @@ int main (int argc, char** argv)
 	int width = 600;
 	int height = 600;
 	eye_x=400;
-	eye_y=0;
+	eye_y=300;
 	eye_z=-400;
 
 	GLFWwindow* window = initGLFW(width, height);
