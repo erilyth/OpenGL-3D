@@ -70,14 +70,21 @@ struct Sprite {
     int status;
     float x_scale,y_scale,z_scale;
     float x_speed,y_speed;
-    float angle; //Current Angle (Actual rotated angle of the object)
+    float angle_x; //Current Angle (Actual rotated angle of the object)
+    float angle_y;
+    float angle_z;
+    float rotation_x_offset;
+    float rotation_y_offset;
+    float rotation_z_offset;
     int inAir;
     float radius;
     int fixed;
     float friction; //Value from 0 to 1
     int health;
     int isRotating;
-    int direction; //0 for clockwise and 1 for anticlockwise for animation
+    int direction_x; //0 for clockwise and 1 for anticlockwise for animation
+    int direction_y;
+    int direction_z;
     float remAngle; //the remaining angle to finish animation
     int isMovingAnim;
     int dx;
@@ -89,6 +96,8 @@ typedef struct Sprite Sprite;
 
 map <string, Sprite> objects;
 map <string, Sprite> playerObjects;
+int player_moving=0;
+int player_rotating=0;
 
 int gameMap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1},
@@ -417,6 +426,18 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
+			case GLFW_KEY_UP:
+				player_moving=0;
+				break;
+			case GLFW_KEY_DOWN:
+				player_moving=0;
+				break;
+			case GLFW_KEY_RIGHT:
+				player_rotating=0;
+				break;
+			case GLFW_KEY_LEFT:
+				player_rotating=0;
+				break;
 			case GLFW_KEY_C:
 				rectangle_rot_status = !rectangle_rot_status;
 				break;
@@ -432,6 +453,18 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 	}
 	else if (action == GLFW_PRESS) {
 		switch (key) {
+			case GLFW_KEY_RIGHT:
+				player_rotating=1;
+				break;
+			case GLFW_KEY_LEFT:
+				player_rotating=-1;
+				break;
+			case GLFW_KEY_UP:
+				player_moving=1;
+				break;
+			case GLFW_KEY_DOWN:
+				player_moving=-1;
+				break;
 			case GLFW_KEY_ESCAPE:
 				quit(window);
 				break;
@@ -685,6 +718,46 @@ float angle=0;
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	if(player_rotating==1){
+		objects["player"].angle_y-=2;
+	}
+	if(player_rotating==-1){
+		objects["player"].angle_y+=2;
+	}
+	if(player_moving==1){
+		objects["player"].z+=cos(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x+=sin(objects["player"].angle_y*M_PI/180)*2;
+	}
+	if(player_moving==-1){
+		objects["player"].z-=cos(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x-=sin(objects["player"].angle_y*M_PI/180)*2;
+	}
+	if(player_moving==1 || player_moving==-1){ //The player is not stationary
+		if(playerObjects["playerhand"].direction_x==0){
+			playerObjects["playerhand"].angle_x+=2;
+			playerObjects["playerhand2"].angle_x-=2;
+			if(playerObjects["playerhand"].angle_x>=45){
+				playerObjects["playerhand"].direction_x=1;
+			}
+		}
+		if(playerObjects["playerhand"].direction_x==1){
+			playerObjects["playerhand"].angle_x-=2;
+			playerObjects["playerhand2"].angle_x+=2;
+			if(playerObjects["playerhand"].angle_x<=-45){
+				playerObjects["playerhand"].direction_x=0;
+			}
+		}
+	}
+	else{
+		playerObjects["playerhand"].angle_x-=playerObjects["playerhand"].angle_x/4;
+		playerObjects["playerhand2"].angle_x-=playerObjects["playerhand2"].angle_x/4;
+		if(playerObjects["playerhand"].angle_x<10 && playerObjects["playerhand"].angle_x>-10){
+			playerObjects["playerhand"].angle_x=0;
+		}
+		if(playerObjects["playerhand2"].angle_x<10 && playerObjects["playerhand2"].angle_x>-10){
+			playerObjects["playerhand2"].angle_x=0;
+		}
+	}
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1){
@@ -725,8 +798,6 @@ void draw (GLFWwindow* window)
 	glm::mat4 MVP;	// MVP = Projection * View * Model
 	static int fontScale = 0;
 
-
-
 	//Draw the objects
     for(map<string,Sprite>::iterator it=objects.begin();it!=objects.end();it++){
         string current = it->first; //The name of the current object
@@ -737,7 +808,9 @@ void draw (GLFWwindow* window)
         Matrices.model = glm::mat4(1.0f);
 
         glm::mat4 ObjectTransform;
-        glm::mat4 rotateObject = glm::rotate((float)((0)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        glm::mat4 rotateObject = glm::rotate((float)((objects[current].angle_y)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        rotateObject*=glm::rotate((float)((objects[current].angle_x)*M_PI/180.0f), glm::vec3(1,0,0));
+        rotateObject*=glm::rotate((float)((objects[current].angle_z)*M_PI/180.0f), glm::vec3(0,0,1));
         glm::mat4 translateObject = glm::translate (glm::vec3(objects[current].x, objects[current].y, objects[current].z)); // glTranslatef
         ObjectTransform=translateObject*rotateObject;
         Matrices.model *= ObjectTransform;
@@ -760,11 +833,28 @@ void draw (GLFWwindow* window)
         Matrices.model = glm::mat4(1.0f);
 
         glm::mat4 ObjectTransform;
-        glm::mat4 rotateObject = glm::rotate((float)((fontScale)*M_PI/180.0f), glm::vec3(0,1,0));  // rotate about vector (1,0,0)
+        glm::mat4 rotateObject = glm::rotate((float)((objects["player"].angle_y)*M_PI/180.0f), glm::vec3(0,1,0));
+    	rotateObject*=glm::rotate((float)((objects[current].angle_x)*M_PI/180.0f), glm::vec3(1,0,0));
+        rotateObject*=glm::rotate((float)((objects[current].angle_z)*M_PI/180.0f), glm::vec3(0,0,1));
+        glm::mat4 selfRotate = glm::rotate((float)((playerObjects[current].angle_y)*M_PI/180.0f), glm::vec3(0,1,0));
+        selfRotate*=glm::rotate((float)((playerObjects[current].angle_x)*M_PI/180.0f), glm::vec3(1,0,0));
+        selfRotate*=glm::rotate((float)((playerObjects[current].angle_z)*M_PI/180.0f), glm::vec3(0,0,1));
+        glm::mat4 translateSelfOffset = glm::translate (glm::vec3(playerObjects[current].rotation_x_offset,playerObjects[current].rotation_y_offset,playerObjects[current].rotation_z_offset));
+        glm::mat4 translateSelfOffsetBack = glm::translate (glm::vec3(-playerObjects[current].rotation_x_offset,-playerObjects[current].rotation_y_offset,-playerObjects[current].rotation_z_offset));
         glm::mat4 translateRelative = glm::translate (glm::vec3(playerObjects[current].x,playerObjects[current].y,playerObjects[current].z));
         glm::mat4 translateRelativeBack = glm::translate (glm::vec3(-playerObjects[current].x,-playerObjects[current].y,-playerObjects[current].z));
         glm::mat4 translateObject = glm::translate (glm::vec3(playerObjects[current].x+objects["player"].x, playerObjects[current].y+objects["player"].y, playerObjects[current].z+objects["player"].z)); // glTranslatef
-        ObjectTransform=translateObject*translateRelativeBack*rotateObject*translateRelative;
+        ObjectTransform=translateObject*translateRelativeBack*rotateObject*translateRelative*translateSelfOffsetBack*selfRotate*translateSelfOffset;
+
+        //Read from right to left when the transformations are applied on points!
+        //Move the object to the self rotation offset specified
+        //Rotations wrt object first
+        //Move the object back to the center
+        //Move the object to the offset specified from its parent
+        //Rotations wrt the parent object
+        //Move the object back to the origin
+        //Move the object to the location of its parent+offsets
+
         Matrices.model *= ObjectTransform;
         MVP = VP * Matrices.model; // MVP = p * V * M
         
@@ -941,7 +1031,10 @@ void initGL (GLFWwindow* window, int width, int height)
 	}
 
 	createModel("player",0,200,50,50,50,50,"cube.data","");
-	createModel("playerhand",50,0,0,50,50,50,"cube.data","player");
+	createModel("playerhand",45,0,0,30,60,30,"cube.data","player");
+	createModel("playerhand2",-45,0,0,30,60,30,"cube.data","player");
+	playerObjects["playerhand"].rotation_y_offset=-30; //So that the rotation of the hand swinging is done on the top of the hand
+	playerObjects["playerhand2"].rotation_y_offset=-30;
 
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
