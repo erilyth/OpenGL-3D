@@ -20,6 +20,9 @@
 #include <GLFW/glfw3.h>
 #include <SOIL/SOIL.h>
 
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 using namespace std;
 
 struct VAO {
@@ -1092,6 +1095,7 @@ void initGL (GLFWwindow* window, int width, int height)
 
 	glEnable (GL_DEPTH_TEST);
 	glDepthFunc (GL_LEQUAL);
+	//glEnable(GL_LIGHTING);
 //	glEnable(GL_BLEND);
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
