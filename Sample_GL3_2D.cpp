@@ -744,22 +744,40 @@ int check_collision(){
 	int collided=0,i,j;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
-			if(gameMap[i][j]==2){
-				string name = "floorcube";
-				name.append(convertInt(i)+convertInt(j));
-				if(objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20){
-					collided=1;
-				}
+			string name = "floorcube";
+			name.append(convertInt(i)+convertInt(j));
+			//The character's legs are quite a bit lower, so we use -50 and +50 when checking y-collision
+			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				collided=1;
 			}
 		}
 	}
 	return collided;
 }
 
+int inAir=0;
+float gravity=5.0;
+
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	objects["player"].y-=gravity;
+	if(check_collision()!=1){
+		inAir=1;
+	}
+	else{
+		inAir=0;
+	}
+	objects["player"].y+=gravity;
+
+	if(inAir==1){
+		objects["player"].y-=gravity;
+		if(check_collision()==1){
+			objects["player"].y+=gravity;
+		}
+	}
+
 	if(player_rotating!=0){
 		objects["player"].angle_y-=player_rotating*2;
 	}
@@ -775,7 +793,7 @@ void draw (GLFWwindow* window)
 			objects["player"].x-=player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
-	if(player_moving!=0){ //The player is not stationary
+	if(player_moving!=0 && !inAir){ //The player is not stationary
 		if(playerObjects["playerhand"].direction_x==0){
 			playerObjects["playerhand"].angle_x+=2;
 			playerObjects["playerleg"].angle_x-=1.4;
@@ -795,7 +813,7 @@ void draw (GLFWwindow* window)
 			}
 		}
 	}
-	else{ //Stop the player movement slowly
+	else if(!inAir){ //Stop the player movement slowly
 		playerObjects["playerhand"].angle_x-=playerObjects["playerhand"].angle_x/4;
 		playerObjects["playerhand2"].angle_x-=playerObjects["playerhand2"].angle_x/4;
 		playerObjects["playerleg"].angle_x-=playerObjects["playerleg"].angle_x/4;
@@ -812,6 +830,12 @@ void draw (GLFWwindow* window)
 		if(playerObjects["playerleg"].angle_x<10 && playerObjects["playerleg"].angle_x>-10){
 			playerObjects["playerleg"].angle_x=0;
 		}
+	}
+	else if(inAir){
+		playerObjects["playerhand"].angle_x=-180;
+		playerObjects["playerhand2"].angle_x=-180;
+		playerObjects["playerleg"].angle_x=0;
+		playerObjects["playerleg2"].angle_x=0;
 	}
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
@@ -1070,7 +1094,7 @@ void initGL (GLFWwindow* window, int width, int height)
 		}
 	}
 
-	createModel("player",0,230,100,63*scale,60*scale,42*scale,"body.data",""); //The player's body
+	createModel("player",0,300,100,63*scale,60*scale,42*scale,"body.data",""); //The player's body
 	createModel("playerhead",0,60*scale,0,28*scale,28*scale,28*scale,"head.data","player");
 	createModel("playerhand",49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
 	createModel("playerhand2",-49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
