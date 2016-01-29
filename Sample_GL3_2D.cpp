@@ -76,7 +76,7 @@ struct Sprite {
     VAO* object;
     int status;
     float x_scale,y_scale,z_scale;
-    float x_speed,y_speed;
+    float x_speed,y_speed,z_speed;
     float angle_x; //Current Angle (Actual rotated angle of the object)
     float angle_y;
     float angle_z;
@@ -86,7 +86,7 @@ struct Sprite {
     int inAir;
     float radius;
     int fixed;
-    float friction; //Value from 0 to 1
+    float friction; //Value from 0 to 1	
     int health;
     int isRotating;
     int direction_x; //0 for clockwise and 1 for anticlockwise for animation
@@ -109,7 +109,7 @@ int player_moving=0;
 int player_rotating=0;
 
 int gameMap[10][10]={
-	{1,1,1,1,1,1,1,1,1,1},
+	{2,1,1,1,1,1,1,1,1,1},
 	{1,1,1,2,1,1,1,1,1,1},
 	{1,2,1,2,1,1,1,1,1,1},
 	{1,2,1,1,2,2,2,2,2,2},
@@ -121,6 +121,7 @@ int gameMap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1}
 };
 
+//1 is not present, 2 is present
 int gameMapPebbles[10][10]={
 	{2,1,1,2,1,1,1,1,1,1},
 	{1,1,1,1,1,1,1,1,1,1},
@@ -134,6 +135,19 @@ int gameMapPebbles[10][10]={
 	{1,1,1,2,1,1,1,1,1,1}	
 };
 
+//1 is not present, 2 is present
+int gameMapTrap[10][10]={
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,2,1,1,1,1,1,1,1,1},
+	{1,1,2,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1}	
+};
 
 GLuint programID, fontProgramID, textureProgramID;
 
@@ -547,7 +561,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-900.0f, 900.0f, -900.0f, 900.0f, -1000.0f, 5000.0f);
+	Matrices.projection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, -1000.0f, 5000.0f);
 }
 
 VAO *triangle, *rectangle;
@@ -750,6 +764,12 @@ int check_collision(){
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
 				collided=1;
 			}
+			name = "floortrap";
+			name.append(convertInt(i)+convertInt(j));
+			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				collided=1;
+				cout << "TRAP DEAD" << endl;
+			}
 		}
 	}
 	return collided;
@@ -757,11 +777,30 @@ int check_collision(){
 
 int inAir=0;
 float gravity=5.0;
+float trapTimer=0;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	trapTimer+=1;
+	int i,j;
+	for(i=0;i<10;i++){
+		for(j=0;j<10;j++){
+			if(gameMapTrap[i][j]==2){
+				string name="floortrap";
+				name.append(convertInt(i)+convertInt(j));
+				if(trapTimer>=0 && trapTimer<=10){
+					objects[name].y+=12;
+				}
+				else if(trapTimer>=90 && trapTimer<=120){
+					objects[name].y-=4;
+				}
+			}
+		}
+	}
+	if(trapTimer>=180)
+		trapTimer=0;
 	objects["player"].y-=gravity;
 	if(check_collision()!=1){
 		inAir=1;
@@ -1084,11 +1123,20 @@ void initGL (GLFWwindow* window, int width, int height)
 			if(gameMap[i][j]!=0){
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j));
-				createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				if(gameMapTrap[i][j]!=2)
+					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				else
+					createModel(name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
 				if(gameMapPebbles[i][j]==2){
 					string new_name="stone";
 					new_name.append(name);
-					createModel (new_name,(j-5)*150,(gameMap[i][j]-1)*150+153,(i-5)*150,200,200,200,"stone.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+5,(i-5)*150,200,200,200,"stone.data","");
+				}
+				if(gameMapTrap[i][j]==2){
+					string new_name="floortrap";
+					new_name.append(convertInt(i)+convertInt(j));
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150/2+150*(gameMap[i][j]-1),(i-5)*150,50,50,50,"cube.data","");
+					objects[new_name].direction_y=1;
 				}
 			}
 		}
