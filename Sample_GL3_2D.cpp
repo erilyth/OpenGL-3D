@@ -764,10 +764,9 @@ int check_collision(){
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
 				collided=1;
 			}
-			name = "floortrap";
+			name = "spike";
 			name.append(convertInt(i)+convertInt(j));
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
-				collided=1;
 				cout << "TRAP DEAD" << endl;
 			}
 		}
@@ -778,6 +777,7 @@ int check_collision(){
 int inAir=0;
 float gravity=5.0;
 float trapTimer=0;
+int justInAir=0;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -788,25 +788,37 @@ void draw (GLFWwindow* window)
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
 			if(gameMapTrap[i][j]==2){
-				string name="floortrap";
+				string name="spike";
 				name.append(convertInt(i)+convertInt(j));
-				if(trapTimer>=0 && trapTimer<=10){
-					objects[name].y+=12;
+				if(trapTimer>0 && trapTimer<=10){
+					objects[name].y+=9;
 				}
-				else if(trapTimer>=90 && trapTimer<=120){
-					objects[name].y-=4;
+				else if(trapTimer>90 && trapTimer<=120){
+					objects[name].y-=3;
 				}
 			}
 		}
 	}
-	if(trapTimer>=180)
+	if(trapTimer>=260)
 		trapTimer=0;
 	objects["player"].y-=gravity;
 	if(check_collision()!=1){
 		inAir=1;
+		justInAir=1;
+		playerObjects["playerhand"].angle_x=0;
+		playerObjects["playerhand2"].angle_x=0;
+		playerObjects["playerleg"].angle_x=0;
+		playerObjects["playerleg2"].angle_x=0;
 	}
-	else{
+	else if(justInAir){
 		inAir=0;
+		if(justInAir==1){
+			justInAir=0;
+		}
+		playerObjects["playerhand"].angle_x=0;
+		playerObjects["playerhand2"].angle_x=0;
+		playerObjects["playerleg"].angle_x=0;
+		playerObjects["playerleg2"].angle_x=0;
 	}
 	objects["player"].y+=gravity;
 
@@ -1123,19 +1135,21 @@ void initGL (GLFWwindow* window, int width, int height)
 			if(gameMap[i][j]!=0){
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j));
-				if(gameMapTrap[i][j]!=2)
-					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
-				else
-					createModel(name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				if(gameMapTrap[i][j]==2){
+					string name2 = "floortrap";
+					name2.append(convertInt(i)+convertInt(j));
+					createModel(name2,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,70,gameMap[i][j]*100,70,"floortrap.data","");
+				}
 				if(gameMapPebbles[i][j]==2){
 					string new_name="stone";
 					new_name.append(name);
 					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+5,(i-5)*150,200,200,200,"stone.data","");
 				}
 				if(gameMapTrap[i][j]==2){
-					string new_name="floortrap";
+					string new_name="spike";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,gameMap[i][j]*150/2+150*(gameMap[i][j]-1),(i-5)*150,50,50,50,"cube.data","");
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150/2+150*(gameMap[i][j]-1),(i-5)*150,70,70,70,"spike.data","");
 					objects[new_name].direction_y=1;
 				}
 			}
