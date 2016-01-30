@@ -110,9 +110,9 @@ int player_rotating=0;
 
 int gameMap[10][10]={
 	{2,1,1,1,1,1,1,1,1,1},
-	{1,1,1,2,1,1,1,1,1,1},
+	{1,1,1,1,1,1,1,1,1,1},
 	{1,2,1,2,1,1,1,1,1,1},
-	{1,2,1,1,2,2,2,2,2,2},
+	{1,2,1,1,2,1,1,1,1,2},
 	{1,1,2,1,1,2,1,1,1,2},
 	{1,1,2,1,1,1,1,1,1,2},
 	{1,1,1,2,1,1,1,1,1,2},
@@ -121,30 +121,16 @@ int gameMap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1}
 };
 
-//1 is not present, 2 is present
-int gameMapPebbles[10][10]={
-	{2,1,1,2,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,2,1,1,1,1,1,1},
-	{1,1,1,1,1,2,1,1,2,1},
-	{1,1,1,1,1,1,1,1,1,2},
-	{1,1,2,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,2,1,2},
-	{1,1,1,2,1,1,1,1,1,1}	
-};
-
-//1 is not present, 2 is present
+//1 is not present, 2,3,4 are present
 int gameMapTrap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1},
-	{1,2,1,1,1,1,1,1,1,1},
-	{1,1,2,1,1,1,1,1,1,1},
+	{1,2,1,1,1,3,3,3,1,1},
+	{1,1,2,1,1,1,3,3,1,1},
+	{1,1,1,1,4,1,1,3,1,1},
+	{1,4,1,1,1,1,1,1,1,4},
 	{1,1,1,1,1,1,1,1,1,1},
 	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
+	{1,1,4,4,1,1,1,1,4,1},
 	{1,1,1,1,1,1,1,1,1,1},
 	{1,1,1,1,1,1,1,1,1,1}	
 };
@@ -752,10 +738,16 @@ float triangle_rotation = 0;
 double prev_mouse_x;
 double prev_mouse_y;
 float angle=0;
+int inAir=0;
+float gravity=5.0;
+float trapTimer=0;
+int justInAir=0;
+float player_speed=1.5;
 
-//Only checks collision on the x and z axes. Not the y axis as of now.
+//Collision checks for gravity, falling etc are only done with the main blocks in the game (The "floorcube" blocks)
 int check_collision(){
 	int collided=0,i,j;
+	player_speed=1.5;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
 			string name = "floorcube";
@@ -769,15 +761,15 @@ int check_collision(){
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
 				cout << "TRAP DEAD" << endl;
 			}
+			name = "watertrap";
+			name.append(convertInt(i)+convertInt(j));
+			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				player_speed=0.8;
+			}
 		}
 	}
 	return collided;
 }
-
-int inAir=0;
-float gravity=5.0;
-float trapTimer=0;
-int justInAir=0;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -833,15 +825,15 @@ void draw (GLFWwindow* window)
 		objects["player"].angle_y-=player_rotating*2;
 	}
 	if(player_moving!=0){
-		objects["player"].z+=player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].z+=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision()==1){
-			objects["player"].z-=player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].z-=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
 	if(player_moving!=0){
-		objects["player"].x+=player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x+=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision()==1){
-			objects["player"].x-=player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].x-=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
 	if(player_moving!=0 && !inAir){ //The player is not stationary
@@ -1133,24 +1125,42 @@ void initGL (GLFWwindow* window, int width, int height)
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
 			if(gameMap[i][j]!=0){
-				string name = "floorcube";
-				name.append(convertInt(i)+convertInt(j));
-				createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				//Spike traps
 				if(gameMapTrap[i][j]==2){
 					string name2 = "floortrap";
 					name2.append(convertInt(i)+convertInt(j));
-					createModel(name2,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,70,gameMap[i][j]*100,70,"floortrap.data","");
-				}
-				if(gameMapPebbles[i][j]==2){
-					string new_name="stone";
-					new_name.append(name);
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+5,(i-5)*150,200,200,200,"stone.data","");
-				}
-				if(gameMapTrap[i][j]==2){
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75+25,(i-5)*150,70,70,70,"floortrap.data","");
 					string new_name="spike";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,gameMap[i][j]*150/2+150*(gameMap[i][j]-1),(i-5)*150,70,70,70,"spike.data","");
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,70,70,70,"spike.data","");
 					objects[new_name].direction_y=1;
+					//This must be created as the gravity/jump checks are done only with these blocks
+					string name = "floorcube";
+					name.append(convertInt(i)+convertInt(j));
+					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				}
+				//Water traps
+				else if(gameMapTrap[i][j]==3){
+					string name2 = "watertrap";
+					name2.append(convertInt(i)+convertInt(j));
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,150,150,150,"water.data","");
+					string name = "floorcube";
+					name.append(convertInt(i)+convertInt(j));
+					createModel (name,(j-5)*150,gameMap[i][j]*150/2-75/2,(i-5)*150,150,gameMap[i][j]*150-75,150,"cube.data","");
+				}
+				//Pebbles
+				else if(gameMapTrap[i][j]==4){
+					string new_name="stone";
+					new_name.append(convertInt(i)+convertInt(j));
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+10,(i-5)*150,200,200,200,"stone.data","");
+					string name = "floorcube";
+					name.append(convertInt(i)+convertInt(j));
+					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+				}
+				else{
+					string name = "floorcube";
+					name.append(convertInt(i)+convertInt(j));
+					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");	
 				}
 			}
 		}
