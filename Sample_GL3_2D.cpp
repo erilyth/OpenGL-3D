@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 #include <cmath>
+#include <time.h>
+#include <stdlib.h>
 
 #include <pthread.h>
 #include <ao/ao.h>
@@ -426,6 +428,7 @@ float triangle_rot_dir = 1;
 float rectangle_rot_dir = -1;
 bool triangle_rot_status = true;
 bool rectangle_rot_status = true;
+int inAir=0;
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
@@ -466,13 +469,20 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				player_rotating=1;
 				break;
 			case GLFW_KEY_LEFT:
-				player_rotating=-1;
+				player_rotating=-1; //The left key has a slight problem when used together with up or down and space.
 				break;
 			case GLFW_KEY_UP:
 				player_moving=1;
 				break;
 			case GLFW_KEY_DOWN:
 				player_moving=-1;
+				break;
+			case GLFW_KEY_SPACE:
+				if(inAir==0){
+					objects["player"].y_speed=10;
+					objects["player"].y+=5;
+					inAir=1;
+				}
 				break;
 			case GLFW_KEY_ESCAPE:
 				quit(window);
@@ -738,8 +748,7 @@ float triangle_rotation = 0;
 double prev_mouse_x;
 double prev_mouse_y;
 float angle=0;
-int inAir=0;
-float gravity=5.0;
+float gravity=0.5;
 float trapTimer=0;
 int justInAir=0;
 float player_speed=1.5;
@@ -765,6 +774,7 @@ int check_collision(){
 			name.append(convertInt(i)+convertInt(j));
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
 				player_speed=0.8;
+				cout << "WATER TRAP" << endl;
 			}
 		}
 	}
@@ -775,6 +785,9 @@ int check_collision(){
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	if(inAir){
+		objects["player"].y+=objects["player"].y_speed;
+	}
 	trapTimer+=1;
 	int i,j;
 	for(i=0;i<10;i++){
@@ -793,17 +806,15 @@ void draw (GLFWwindow* window)
 	}
 	if(trapTimer>=260)
 		trapTimer=0;
-	objects["player"].y-=gravity;
+	objects["player"].y-=5;
 	if(check_collision()!=1){
 		inAir=1;
-		justInAir=1;
 		playerObjects["playerhand"].angle_x=0;
 		playerObjects["playerhand2"].angle_x=0;
 		playerObjects["playerleg"].angle_x=0;
 		playerObjects["playerleg2"].angle_x=0;
 	}
 	else if(justInAir){
-		inAir=0;
 		if(justInAir==1){
 			justInAir=0;
 		}
@@ -812,12 +823,29 @@ void draw (GLFWwindow* window)
 		playerObjects["playerleg"].angle_x=0;
 		playerObjects["playerleg2"].angle_x=0;
 	}
-	objects["player"].y+=gravity;
+	objects["player"].y+=5;
 
 	if(inAir==1){
-		objects["player"].y-=gravity;
-		if(check_collision()==1){
-			objects["player"].y+=gravity;
+		objects["player"].y_speed-=gravity;
+		if(objects["player"].y_speed<=-12.0){
+			objects["player"].y_speed=-12.0;
+		}
+		int collided=0;
+		for(i=0;i<10;i++){
+			for(j=0;j<10;j++){
+				string name = "floorcube";
+				name.append(convertInt(i)+convertInt(j));
+				//The character's legs are quite a bit lower, so we use -45 and +45 when checking y-collision
+				objects["player"].y-=5;
+				if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+					collided=1;
+					objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
+					objects["player"].y_speed=0;
+					inAir=0;
+					justInAir=1;
+				}
+				objects["player"].y+=5;
+			}
 		}
 	}
 
@@ -829,8 +857,6 @@ void draw (GLFWwindow* window)
 		if(check_collision()==1){
 			objects["player"].z-=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
-	}
-	if(player_moving!=0){
 		objects["player"].x+=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision()==1){
 			objects["player"].x-=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
@@ -880,6 +906,7 @@ void draw (GLFWwindow* window)
 		playerObjects["playerleg"].angle_x=0;
 		playerObjects["playerleg2"].angle_x=0;
 	}
+
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1){
@@ -1143,7 +1170,14 @@ void initGL (GLFWwindow* window, int width, int height)
 				else if(gameMapTrap[i][j]==3){
 					string name2 = "watertrap";
 					name2.append(convertInt(i)+convertInt(j));
-					createModel(name2,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,150,150,150,"water.data","");
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,150,120,150,"water.data","");
+					int random=rand()%7;
+					if(random<=1){
+						string name3 = "lilypad";
+						name3.append(convertInt(i)+convertInt(j));
+						createModel(name3,(j-5)*150,gameMap[i][j]*150,(i-5)*150,30,30,30,"lilypad.data","");
+						objects[name3].angle_y=(rand()%360);
+					}
 					string name = "floorcube";
 					name.append(convertInt(i)+convertInt(j));
 					createModel (name,(j-5)*150,gameMap[i][j]*150/2-75/2,(i-5)*150,150,gameMap[i][j]*150-75,150,"cube.data","");
@@ -1281,13 +1315,13 @@ void* play_audio(void*){
 
 int main (int argc, char** argv)
 {
-
+	srand(time(NULL));
 	//audioFile="trial.mp3";
     //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
 	int width = 700;
 	int height = 700;
 	eye_x=400;
-	eye_y=300;
+	eye_y=400;
 	eye_z=-400;
 
 	GLFWwindow* window = initGLFW(width, height);
