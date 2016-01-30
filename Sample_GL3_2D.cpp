@@ -429,6 +429,11 @@ float rectangle_rot_dir = -1;
 bool triangle_rot_status = true;
 bool rectangle_rot_status = true;
 int inAir=0;
+//Camera eye, target and up vector components
+float eye_x,eye_y,eye_z;
+float angle=0;
+float camera_radius;
+int left_mouse_clicked;
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
@@ -438,6 +443,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
+			case GLFW_KEY_T:
+				camera_radius=1; //Top view
+				eye_x = -50+camera_radius*cos(angle*M_PI/180);
+				eye_z = -50+camera_radius*sin(angle*M_PI/180);
+				break;
+			case GLFW_KEY_Y:
+				camera_radius=400; //Tower view
+				eye_x = -50+camera_radius*cos(angle*M_PI/180);
+				eye_z = -50+camera_radius*sin(angle*M_PI/180);
+				break;
 			case GLFW_KEY_UP:
 				player_moving=0;
 				break;
@@ -505,9 +520,6 @@ void keyboardChar (GLFWwindow* window, unsigned int key)
 			break;
 	}
 }
-
-float eye_x,eye_y,eye_z;
-int left_mouse_clicked;
 
 /* Executed when a mouse button is pressed/released */
 void mouseButton (GLFWwindow* window, int button, int action, int mods)
@@ -747,7 +759,6 @@ float rectangle_rotation = 0;
 float triangle_rotation = 0;
 double prev_mouse_x;
 double prev_mouse_y;
-float angle=0;
 float gravity=0.5;
 float trapTimer=0;
 int justInAir=0;
@@ -910,9 +921,9 @@ void draw (GLFWwindow* window)
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1){
-		angle+=0.01;
-		eye_x = 400*cos(angle);
-    	eye_z = 400*sin(angle);
+		angle+=1;
+		eye_x = -50+camera_radius*cos(angle*M_PI/180);
+		eye_z = -50+camera_radius*sin(angle*M_PI/180);
 	}
 	prev_mouse_x=new_mouse_x;
 	prev_mouse_y=new_mouse_y;
@@ -926,7 +937,7 @@ void draw (GLFWwindow* window)
 	// Eye - Location of camera. Don't change unless you are sure!!
 	glm::vec3 eye (eye_x, eye_y, eye_z);
 	// Target - Where is the camera looking at.  Don't change unless you are sure!!
-	glm::vec3 target (0, 0, 0);
+	glm::vec3 target (-50, 0, -50);
 	// Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
 	glm::vec3 up (0, 1, 0);
 
@@ -1320,9 +1331,11 @@ int main (int argc, char** argv)
     //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
 	int width = 700;
 	int height = 700;
-	eye_x=400;
-	eye_y=400;
-	eye_z=-400;
+	camera_radius=400;
+	angle=45;
+	eye_x = -50+camera_radius*cos(angle*M_PI/180);
+	eye_y = 400;
+    eye_z = -50+camera_radius*sin(angle*M_PI/180);
 
 	GLFWwindow* window = initGLFW(width, height);
 
