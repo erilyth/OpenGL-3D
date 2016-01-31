@@ -109,6 +109,7 @@ map <string, Sprite> objects;
 map <string, Sprite> playerObjects;
 int player_moving=0;
 int player_rotating=0;
+float camera_fov=1.3;
 
 int gameMap[10][10]={
 	{2,5,5,5,1,1,1,1,1,1},
@@ -555,7 +556,7 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	 is different from WindowSize */
 	glfwGetFramebufferSize(window, &fbwidth, &fbheight);
 
-	GLfloat fov = 90.0f;
+	GLfloat fov = camera_fov; //Use from 1 to 2
 
 	// sets the viewport of openGL renderer
 	glViewport (0, 0, (GLsizei) fbwidth, (GLsizei) fbheight);
@@ -566,10 +567,27 @@ void reshapeWindow (GLFWwindow* window, int width, int height)
 	 gluPerspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1, 500.0); */
 	// Store the projection matrix in a variable for future use
 	// Perspective projection for 3D views
-	// Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 500.0f);
+	 Matrices.projection = glm::perspective (fov, (GLfloat) fbwidth / (GLfloat) fbheight, 0.1f, 7000.0f);
 
 	// Ortho projection for 2D views
-	Matrices.projection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, -1000.0f, 5000.0f);
+	//Matrices.projection = glm::ortho(-1000.0f, 1000.0f, -1000.0f, 1000.0f, -1000.0f, 5000.0f);
+}
+
+void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (yoffset==-1) { 
+        camera_fov*=1.1;
+    }
+    else if(yoffset==1){
+        camera_fov/=1.1; //make it bigger than current size
+    }
+    if(camera_fov>=3){
+    	camera_fov=3;
+    }
+    if(camera_fov<=0.5){
+    	camera_fov=0.5;
+    }
+    reshapeWindow(window,700,700);
 }
 
 VAO *triangle, *rectangle;
@@ -1078,7 +1096,7 @@ void draw (GLFWwindow* window)
 	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
 	// Render font
-	GL3Font.font->Render("Round n Round we go !!");
+	//GL3Font.font->Render("Round n Round we go !!");
 
 
 
@@ -1135,6 +1153,7 @@ GLFWwindow* initGLFW (int width, int height)
 
 	/* Register function to handle mouse click */
 	glfwSetMouseButtonCallback(window, mouseButton);  // mouse button clicks
+	glfwSetScrollCallback(window, mousescroll); // mouse scroll
 
 	return window;
 }
@@ -1353,10 +1372,10 @@ int main (int argc, char** argv)
     //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
 	int width = 700;
 	int height = 700;
-	camera_radius=400;
+	camera_radius=800;
 	angle=45;
 	eye_x = -50+camera_radius*cos(angle*M_PI/180);
-	eye_y = 400;
+	eye_y = 1000;
     eye_z = -50+camera_radius*sin(angle*M_PI/180);
 
 	GLFWwindow* window = initGLFW(width, height);
