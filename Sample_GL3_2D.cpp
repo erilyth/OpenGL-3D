@@ -126,13 +126,13 @@ int gameMap[10][10]={
 //1 is not present, 2,3,4 are present
 int gameMapTrap[10][10]={
 	{1,1,1,1,1,1,1,1,1,1},
-	{1,2,1,1,1,3,3,3,1,1},
-	{1,1,2,1,1,1,3,3,1,1},
-	{1,1,1,1,4,1,1,3,1,1},
-	{1,4,1,1,1,1,1,1,1,4},
+	{1,1,1,1,1,1,3,3,1,1},
+	{1,1,1,1,1,3,3,3,1,1},
+	{1,1,1,1,1,1,1,3,1,1},
+	{1,1,1,1,1,1,1,3,1,1},
+	{1,1,1,1,1,1,1,1,2,1},
 	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,4,4,1,1,1,1,4,1},
+	{1,1,1,1,1,1,2,2,1,1},
 	{1,1,1,1,1,1,1,1,1,1},
 	{1,1,1,1,1,1,1,1,1,1}	
 };
@@ -770,13 +770,18 @@ int check_collision(){
 	player_speed=1.5;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
-			string name = "floorcube";
-			name.append(convertInt(i)+convertInt(j));
-			//The character's legs are quite a bit lower, so we use -50 and +50 when checking y-collision
-			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
-				collided=1;
+			int p;
+			//The floor cubes might be present at various depths
+			for(p=0;p<gameMap[i][j];p++){
+				string name = "floorcube";
+				name.append(convertInt(i)+convertInt(j)+convertInt(p));
+				//The character's legs are quite a bit lower, so we use -50 and +50 when checking y-collision
+				if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+					collided=1;
+				}
 			}
-			name = "spike";
+			//The traps/features etc are only on the top level of the floor
+			string name = "spike";
 			name.append(convertInt(i)+convertInt(j));
 			if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
 				cout << "TRAP DEAD" << endl;
@@ -800,7 +805,7 @@ void draw (GLFWwindow* window)
 		objects["player"].y+=objects["player"].y_speed;
 	}
 	trapTimer+=1;
-	int i,j;
+	int i,j,p;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
 			if(gameMapTrap[i][j]==2){
@@ -844,18 +849,20 @@ void draw (GLFWwindow* window)
 		int collided=0;
 		for(i=0;i<10;i++){
 			for(j=0;j<10;j++){
-				string name = "floorcube";
-				name.append(convertInt(i)+convertInt(j));
-				//The character's legs are quite a bit lower, so we use -45 and +45 when checking y-collision
-				objects["player"].y-=5;
-				if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
-					collided=1;
-					objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
-					objects["player"].y_speed=0;
-					inAir=0;
-					justInAir=1;
+				for(p=0;p<gameMap[i][j];p++){
+					string name = "floorcube";
+					name.append(convertInt(i)+convertInt(j)+convertInt(p));
+					//The character's legs are quite a bit lower, so we use -45 and +45 when checking y-collision
+					objects["player"].y-=5;
+					if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+						collided=1;
+						objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
+						objects["player"].y_speed=0;
+						inAir=0;
+						justInAir=1;
+					}
+					objects["player"].y+=5;
 				}
-				objects["player"].y+=5;
 			}
 		}
 	}
@@ -1173,9 +1180,12 @@ void initGL (GLFWwindow* window, int width, int height)
 					createModel (new_name,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,70,70,70,"spike.data","");
 					objects[new_name].direction_y=1;
 					//This must be created as the gravity/jump checks are done only with these blocks
-					string name = "floorcube";
-					name.append(convertInt(i)+convertInt(j));
-					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+					int p;
+					for(p=0;p<gameMap[i][j];p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+					}
 				}
 				//Water traps
 				else if(gameMapTrap[i][j]==3){
@@ -1189,23 +1199,35 @@ void initGL (GLFWwindow* window, int width, int height)
 						createModel(name3,(j-5)*150,gameMap[i][j]*150,(i-5)*150,30,30,30,"lilypad.data","");
 						objects[name3].angle_y=(rand()%360);
 					}
+					int p;
+					for(p=0;p<gameMap[i][j]-1;p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+					}
 					string name = "floorcube";
-					name.append(convertInt(i)+convertInt(j));
-					createModel (name,(j-5)*150,gameMap[i][j]*150/2-75/2,(i-5)*150,150,gameMap[i][j]*150-75,150,"cube.data","");
+					name.append(convertInt(i)+convertInt(j)+convertInt(p));
+					createModel (name,(j-5)*150,p*150+150/2-75/2,(i-5)*150,150,75,150,"cube.data","");
 				}
 				//Pebbles
 				else if(gameMapTrap[i][j]==4){
 					string new_name="stone";
 					new_name.append(convertInt(i)+convertInt(j));
 					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+10,(i-5)*150,200,200,200,"stone.data","");
-					string name = "floorcube";
-					name.append(convertInt(i)+convertInt(j));
-					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");
+					int p;
+					for(p=0;p<gameMap[i][j];p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+					}
 				}
 				else{
-					string name = "floorcube";
-					name.append(convertInt(i)+convertInt(j));
-					createModel (name,(j-5)*150,gameMap[i][j]*150/2,(i-5)*150,150,gameMap[i][j]*150,150,"cube.data","");	
+					int p;
+					for(p=0;p<gameMap[i][j];p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+					}
 				}
 			}
 		}
