@@ -110,33 +110,38 @@ map <string, Sprite> playerObjects;
 int player_moving=0;
 int player_rotating=0;
 float camera_fov=1.3;
+int currentLevel=0;
+int height,width;
 
+//The level specific map and trap map are loaded from files
 int gameMap[10][10]={
-	{2,5,5,5,1,1,1,1,1,1},
-	{1,5,5,5,1,1,1,1,1,1},
-	{1,2,1,2,1,1,1,1,1,1},
-	{1,2,1,1,2,1,1,1,1,2},
-	{1,0,2,1,1,2,1,1,1,2},
-	{1,1,2,1,1,1,1,1,1,2},
-	{1,1,1,2,1,1,1,1,0,2},
-	{1,0,1,1,2,1,1,1,1,1},
-	{1,1,1,3,3,2,2,2,2,2},
-	{1,3,3,3,3,1,1,1,1,1}
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0}
 };
 
 //1 is not present, 2,3,4 are present
 int gameMapTrap[10][10]={
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,3,3,1,1},
-	{1,1,1,1,1,3,3,3,1,1},
-	{1,1,1,1,1,1,1,3,1,1},
-	{1,1,1,1,1,1,1,3,1,1},
-	{1,1,1,1,1,1,1,1,2,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,2,2,1,1},
-	{1,1,1,1,1,1,1,1,1,1},
-	{1,1,1,1,1,1,1,1,1,1}	
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0}
 };
+
+void goToNextLevel(GLFWwindow* window);
 
 GLuint programID, fontProgramID, textureProgramID;
 
@@ -539,6 +544,7 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
 		case GLFW_MOUSE_BUTTON_RIGHT:
 			if (action == GLFW_RELEASE) {
 				rectangle_rot_dir *= -1;
+				goToNextLevel(window); //Takes you to the next level
 			}
 			break;
 		default:
@@ -1162,6 +1168,41 @@ GLFWwindow* initGLFW (int width, int height)
 /* Add all the models to be created here */
 void initGL (GLFWwindow* window, int width, int height)
 {
+	string levelmap = "Levels/gameMap"+convertInt(currentLevel+1);
+	string trapmap = "Levels/gameMapTrap"+convertInt(currentLevel+1);
+	levelmap+=".txt";
+	trapmap+=".txt";
+
+	cout << levelmap << endl;
+	fstream myfile(levelmap.c_str());
+	int a,i=0,j=0;
+	if (myfile.is_open()){
+		while(myfile >> a){
+			if(i==10){
+				i=0;
+				j++;
+			}
+			gameMap[i][j]=a;
+			i++;
+		}
+		myfile.close();
+	}
+
+	fstream myfile2(trapmap.c_str());
+	i=0;
+	j=0;
+	if (myfile2.is_open()){
+		while(myfile2 >> a){
+			if(i==10){
+				i=0;
+				j++;
+			}
+			gameMapTrap[i][j]=a;
+			i++;
+		}
+		myfile2.close();
+	}
+
 	// Load Textures
 	// Enable Texture0 as current texture memory
 	glActiveTexture(GL_TEXTURE0);
@@ -1185,7 +1226,7 @@ void initGL (GLFWwindow* window, int width, int height)
 
 	float scale=0.7;
 
-	int i,j,k;
+	int k;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
 			if(gameMap[i][j]!=0){
@@ -1315,6 +1356,16 @@ void initGL (GLFWwindow* window, int width, int height)
 
 }
 
+void goToNextLevel(GLFWwindow* window){
+	currentLevel++;
+	objects.clear();
+	playerObjects.clear();
+	trapTimer=0;
+	justInAir=0;
+	player_speed=1.5;
+	initGL(window,width,height);
+}
+
 //Set the audioFile parameter to the file name first before calling this function
 void* play_audio(void*){
 	mpg123_handle *mh;
@@ -1370,8 +1421,8 @@ int main (int argc, char** argv)
 	srand(time(NULL));
 	//audioFile="trial.mp3";
     //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
-	int width = 700;
-	int height = 700;
+	width = 700;
+	height = 700;
 	camera_radius=800;
 	angle=45;
 	eye_x = -50+camera_radius*cos(angle*M_PI/180);
