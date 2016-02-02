@@ -1386,8 +1386,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	// Enable Texture0 as current texture memory
 	glActiveTexture(GL_TEXTURE0);
 	// load an image file directly as a new OpenGL texture
-	// GLuint texID = SOIL_load_OGL_texture ("beach.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_TEXTURE_REPEATS); // Buggy for OpenGL3
-	GLuint textureID = createTexture("beach2.png");
+	// GLuint texID = SOIL_load_OGL_texture ("Images/beach.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_TEXTURE_REPEATS); // Buggy for OpenGL3
+	GLuint textureID = createTexture("Images/beach2.png");
 	// check for an error during the load process
 	if(textureID == 0 )
 		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
@@ -1413,104 +1413,104 @@ void initGL (GLFWwindow* window, int width, int height)
 				if(gameMapTrap[i][j]==2){
 					string name2 = "floortrap";
 					name2.append(convertInt(i)+convertInt(j));
-					createModel(name2,(j-5)*150,gameMap[i][j]*150-75+25,(i-5)*150,70,70,70,"floortrap.data","");
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75+25,(i-5)*150,70,70,70,"Models/floortrap.data","");
 					string new_name="spike";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,70,70,70,"spike.data","");
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,70,70,70,"Models/spike.data","");
 					objects[new_name].direction_y=1;
 					//This must be created as the gravity/jump checks are done only with these blocks
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 				//Water traps
 				else if(gameMapTrap[i][j]==3){
 					string name2 = "watertrap";
 					name2.append(convertInt(i)+convertInt(j));
-					createModel(name2,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,150,120,150,"water.data","");
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,150,120,150,"Models/water.data","");
 					int random=rand()%7;
 					if(random<=1){
 						string name3 = "lilypad";
 						name3.append(convertInt(i)+convertInt(j));
-						createModel(name3,(j-5)*150,gameMap[i][j]*150,(i-5)*150,30,30,30,"lilypad.data","");
+						createModel(name3,(j-5)*150,gameMap[i][j]*150,(i-5)*150,30,30,30,"Models/lilypad.data","");
 						objects[name3].angle_y=(rand()%360);
 					}
 					int p;
 					for(p=0;p<gameMap[i][j]-1;p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 					string name = "floorcube";
 					name.append(convertInt(i)+convertInt(j)+convertInt(p));
-					createModel (name,(j-5)*150,p*150+150/2-75/2,(i-5)*150,150,75,150,"cube.data","");
+					createModel (name,(j-5)*150,p*150+150/2-75/2,(i-5)*150,150,75,150,"Models/cube.data","");
 				}
 				//Pebbles
 				else if(gameMapTrap[i][j]==4){
 					string new_name="stone";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+10,(i-5)*150,200,200,200,"stone.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+10,(i-5)*150,200,200,200,"Models/stone.data","");
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 				else if(gameMapTrap[i][j]==5){ //Elevator needs 3 blocks space for doors to open
 					string new_name = "finishelevator";
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+79,(i-5)*150,70,100,70,"elevator.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+79,(i-5)*150,70,100,70,"Models/elevator.data","");
 					string elevatorblock = new_name+"back";
-					createModel (elevatorblock,(j-5)*150+51,(gameMap[i][j])*150+78,(i-5)*150,10,150,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150+51,(gameMap[i][j])*150+78,(i-5)*150,10,150,130,"Models/cube.data","");
 					elevatorblock = new_name+"left";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78,(i-5)*150+62,130,150,10,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78,(i-5)*150+62,130,150,10,"Models/cube.data","");
 					elevatorblock = new_name+"right";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78,(i-5)*150-62,130,150,10,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78,(i-5)*150-62,130,150,10,"Models/cube.data","");
 					elevatorblock = new_name+"top";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85,(i-5)*150,130,10,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85,(i-5)*150,130,10,130,"Models/cube.data","");
 					elevatorblock = new_name+"bottom";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78-85,(i-5)*150,130,10,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78-85,(i-5)*150,130,10,130,"Models/cube.data","");
 					objects[new_name].angle_y=180;
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 				else if(gameMapTrap[i][j]==6){ //Elevator needs 3 blocks space for doors to open
 					string new_name = "startelevator";
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+79+300,(i-5)*150,70,100,70,"elevator.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+79+300,(i-5)*150,70,100,70,"Models/elevator.data","");
 					string elevatorblock = new_name+"back";
-					createModel (elevatorblock,(j-5)*150+51,(gameMap[i][j])*150+78+300,(i-5)*150,10,150,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150+51,(gameMap[i][j])*150+78+300,(i-5)*150,10,150,130,"Models/cube.data","");
 					elevatorblock = new_name+"left";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+300,(i-5)*150+62,130,150,10,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+300,(i-5)*150+62,130,150,10,"Models/cube.data","");
 					elevatorblock = new_name+"right";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+300,(i-5)*150-62,130,150,10,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+300,(i-5)*150-62,130,150,10,"Models/cube.data","");
 					elevatorblock = new_name+"top";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85+300,(i-5)*150,130,10,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85+300,(i-5)*150,130,10,130,"Models/cube.data","");
 					elevatorblock = new_name+"bottom";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78-85+300,(i-5)*150,130,10,130,"cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78-85+300,(i-5)*150,130,10,130,"Models/cube.data","");
 					objects[new_name].angle_y=180;
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 				else if(gameMapTrap[i][j]==7){
 					string new_name = "star";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,gameMap[i][j]*150+75,(i-5)*150,20,20,20,"star.data","");
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150+75,(i-5)*150,20,20,20,"Models/star.data","");
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 				else{
@@ -1518,19 +1518,19 @@ void initGL (GLFWwindow* window, int width, int height)
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
-						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"cube.data","");
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
 					}
 				}
 			}
 		}
 	}
 
-	createModel("player",0,300,100,63*scale,60*scale,42*scale,"body.data",""); //The player's body
-	createModel("playerhead",0,60*scale,0,28*scale,28*scale,28*scale,"head.data","player");
-	createModel("playerhand",49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
-	createModel("playerhand2",-49*scale,-2*scale,0,16*scale,32*scale,16*scale,"hand.data","player");
-	createModel("playerleg",15*scale,-68*scale,0,15*scale,48*scale,15*scale,"leg.data","player");
-	createModel("playerleg2",-15*scale,-68*scale,0,15*scale,48*scale,15*scale,"leg.data","player");
+	createModel("player",0,300,100,63*scale,60*scale,42*scale,"Models/body.data",""); //The player's body
+	createModel("playerhead",0,60*scale,0,28*scale,28*scale,28*scale,"Models/head.data","player");
+	createModel("playerhand",49*scale,-2*scale,0,16*scale,32*scale,16*scale,"Models/hand.data","player");
+	createModel("playerhand2",-49*scale,-2*scale,0,16*scale,32*scale,16*scale,"Models/hand.data","player");
+	createModel("playerleg",15*scale,-68*scale,0,15*scale,48*scale,15*scale,"Models/leg.data","player");
+	createModel("playerleg2",-15*scale,-68*scale,0,15*scale,48*scale,15*scale,"Models/leg.data","player");
 	playerObjects["playerhand"].rotation_y_offset=-30*scale; //So that the rotation of the hand swinging is done on the top of the hand
 	playerObjects["playerhand2"].rotation_y_offset=-30*scale;
 	playerObjects["playerleg"].rotation_y_offset=-30*scale;
@@ -1556,7 +1556,7 @@ void initGL (GLFWwindow* window, int width, int height)
 
 	// Initialise FTGL stuff
 	//const char* fontfile = "/home/harsha/Classes/Two-2/Graphics/OGL3Sample2D/GLFW/GL3_Fonts_Textures/arial.ttf";
-	const char* fontfile = "arial.ttf";
+	const char* fontfile = "Fonts/arial.ttf";
 	GL3Font.font = new FTExtrudeFont(fontfile); // 3D extrude style rendering
 
 	if(GL3Font.font->Error())
@@ -1657,7 +1657,7 @@ void* play_audio(void*){
 int main (int argc, char** argv)
 {
 	srand(time(NULL));
-	//audioFile="trial.mp3";
+	//audioFile="Sounds/trial.mp3";
     //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
 	width = 700;
 	height = 700;
