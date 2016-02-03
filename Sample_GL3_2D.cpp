@@ -112,6 +112,8 @@ int player_rotating=0;
 float camera_fov=1.3;
 int currentLevel=0;
 int height,width;
+int camera_follow=0;
+int camera_fps=0;
 
 int elevatorStartLevel=0;
 int elevatorFinishLevel=0;
@@ -459,9 +461,11 @@ bool rectangle_rot_status = true;
 int inAir=0;
 //Camera eye, target and up vector components
 float eye_x,eye_y,eye_z;
+float target_x=-50,target_y,target_z=-50;
 float angle=0;
 float camera_radius;
 int left_mouse_clicked;
+int camera_disable_rotation=0;
 
 int playerOnFinishElevator(){
 	int onElevator=0,i,j,k;
@@ -506,14 +510,38 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 	if (action == GLFW_RELEASE) {
 		switch (key) {
 			case GLFW_KEY_T:
+				camera_disable_rotation=1;
+				camera_follow=0;
+				camera_fps=0;
 				camera_radius=1; //Top view
-				eye_x = -50+camera_radius*cos(angle*M_PI/180);
-				eye_z = -50+camera_radius*sin(angle*M_PI/180);
+				eye_x = objects["player"].x+camera_radius*cos(angle*M_PI/180);
+				eye_z = objects["player"].z+camera_radius*sin(angle*M_PI/180);
+				eye_y=600;
+				target_x=objects["player"].x;
+				target_y=0;
+				target_z=objects["player"].z;
 				break;
 			case GLFW_KEY_Y:
+				camera_disable_rotation=0;
+				camera_follow=0;
+				camera_fps=0;
 				camera_radius=800; //Tower view
 				eye_x = -50+camera_radius*cos(angle*M_PI/180);
 				eye_z = -50+camera_radius*sin(angle*M_PI/180);
+				eye_y=600;
+				target_x=-50;
+				target_y=0;
+				target_z=-50;
+				break;
+			case GLFW_KEY_U:
+				camera_disable_rotation=1;
+				camera_fps=0;
+				camera_follow=1;
+				break;
+			case GLFW_KEY_I:
+				camera_disable_rotation=1;
+				camera_follow=0;
+				camera_fps=1;
 				break;
 			case GLFW_KEY_UP:
 				player_moving=0;
@@ -926,6 +954,22 @@ int check_collision(){
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	if(camera_follow==1){
+		target_x=objects["player"].x;
+		target_y=objects["player"].y;
+		target_z=objects["player"].z;
+		eye_x=target_x-200*sin(objects["player"].angle_y*M_PI/180);
+		eye_y=target_y+200;
+		eye_z=target_z-200*cos(objects["player"].angle_y*M_PI/180);
+	}
+	if(camera_fps==1){
+		target_x=objects["player"].x+40*sin(objects["player"].angle_y*M_PI/180);
+		target_y=objects["player"].y+60;
+		target_z=objects["player"].z+40*cos(objects["player"].angle_y*M_PI/180);
+		eye_x=target_x-10*sin(objects["player"].angle_y*M_PI/180);
+		eye_y=target_y;
+		eye_z=target_z-10*cos(objects["player"].angle_y*M_PI/180);
+	}
 	int i,j;
 	for(i=0;i<10;i++){
 		for(j=0;j<10;j++){
@@ -1130,7 +1174,7 @@ void draw (GLFWwindow* window)
 
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
-	if(left_mouse_clicked==1){
+	if(left_mouse_clicked==1 && camera_follow==0 && camera_disable_rotation==0){
 		angle+=1;
 		eye_x = -50+camera_radius*cos(angle*M_PI/180);
 		eye_z = -50+camera_radius*sin(angle*M_PI/180);
@@ -1147,7 +1191,7 @@ void draw (GLFWwindow* window)
 	// Eye - Location of camera. Don't change unless you are sure!!
 	glm::vec3 eye (eye_x, eye_y, eye_z);
 	// Target - Where is the camera looking at.  Don't change unless you are sure!!
-	glm::vec3 target (-50, 0, -50);
+	glm::vec3 target (target_x, target_y, target_z);
 	// Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
 	glm::vec3 up (0, 1, 0);
 
