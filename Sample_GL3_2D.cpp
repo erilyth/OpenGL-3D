@@ -681,7 +681,7 @@ void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
     reshapeWindow(window,700,700);
 }
 
-VAO *triangle, *rectangle;
+VAO *triangle, *skybox, *skybox1, *skybox2, *skybox3, *skybox4, *skybox5;
 
 // Creates the triangle object used in this sample code
 void createTriangle ()
@@ -706,31 +706,27 @@ void createTriangle ()
 }
 
 // Creates the rectangle object used in this sample code
-void createRectangle (GLuint textureID)
+void createRectangle (GLuint textureID, GLfloat vertex_buffer[],string name)
 {
 	// GL3 accepts only Triangles. Quads are not supported
-	static const GLfloat vertex_buffer_data [] = {
-		-140,-100,0, // vertex 1
-		140,-100,0, // vertex 2
-		140, 100,0, // vertex 3
+	GLfloat vertex_buffer_data [18];
+	int i;
+	for(i=0;i<18;i++){
+		vertex_buffer_data[i]=vertex_buffer[i];
+	}
 
-		140, 100,0, // vertex 3
-		-140, 100,0, // vertex 4
-		-140,-100,0  // vertex 1
-	};
-
-	static const GLfloat color_buffer_data [] = {
+	GLfloat color_buffer_data [] = {
 		1,0,0, // color 1
 		0,0,1, // color 2
 		0,1,0, // color 3
 
 		0,1,0, // color 3
-		0.3,0.3,0.3, // color 4
+		0,0,1, // color 4
 		1,0,0  // color 1
 	};
 
 	// Texture coordinates start with (0,0) at top left of the image to (1,1) at bot right
-	static const GLfloat texture_buffer_data [] = {
+	GLfloat texture_buffer_data [] = {
 		0,1, // TexCoord 1 - bot left
 		1,1, // TexCoord 2 - bot right
 		1,0, // TexCoord 3 - top right
@@ -741,7 +737,18 @@ void createRectangle (GLuint textureID)
 	};
 
 	// create3DTexturedObject creates and returns a handle to a VAO that can be used later
-	rectangle = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox")
+		skybox = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox1")
+		skybox1 = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox2")
+		skybox2 = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox3")
+		skybox3 = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox4")
+		skybox4 = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
+	if(name=="skybox5")
+		skybox5 = create3DTexturedObject(GL_TRIANGLES, 6, vertex_buffer_data, texture_buffer_data, textureID, GL_FILL);
 }
 
 void createModel (string name, float x_pos, float y_pos, float z_pos, float x_scale, float y_scale, float z_scale, string filename, string layer) //Create object from blender
@@ -1299,9 +1306,12 @@ void draw (GLFWwindow* window)
 	glUniform1i(glGetUniformLocation(textureProgramID, "texSampler"), 0);
 
 	// draw3DObject draws the VAO given to it using current MVP matrix
-	//draw3DTexturedObject(rectangle);
-
-
+	draw3DTexturedObject(skybox);
+	draw3DTexturedObject(skybox1);
+	draw3DTexturedObject(skybox2);
+	draw3DTexturedObject(skybox3);
+	draw3DTexturedObject(skybox4);
+	draw3DTexturedObject(skybox5);
 
 	// Increment angles
 	float increments = 0;
@@ -1431,10 +1441,9 @@ void initGL (GLFWwindow* window, int width, int height)
 	glActiveTexture(GL_TEXTURE0);
 	// load an image file directly as a new OpenGL texture
 	// GLuint texID = SOIL_load_OGL_texture ("Images/beach.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_TEXTURE_REPEATS); // Buggy for OpenGL3
-	GLuint textureID = createTexture("Images/beach2.png");
 	// check for an error during the load process
-	if(textureID == 0 )
-		cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
+	//if(textureID == 0 )
+	//	cout << "SOIL loading error: '" << SOIL_last_result() << "'" << endl;
 
 	// Create and compile our GLSL program from the texture shaders
 	textureProgramID = LoadShaders( "TextureRender.vert", "TextureRender.frag" );
@@ -1444,8 +1453,74 @@ void initGL (GLFWwindow* window, int width, int height)
 
 	/* Objects should be created before any other gl function and shaders */
 	// Create the models
-	createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
-	createRectangle (textureID);
+	//createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
+	
+	//Creating the sky box
+	float vertX[]={0,-1500,-1500,-1500,-1500,1500,1500,1500,1500};
+	float vertY[]={0,-1500,-1500,1500,1500,-1500,-1500,1500,1500};
+	float vertZ[]={0,-1500,1500,-1500,1500,-1500,1500,-1500,1500};
+	GLfloat vertex_buffer_data [] = {
+		vertX[1],vertY[1],vertZ[1],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[1],vertY[1],vertZ[1]
+	};
+	GLfloat vertex_buffer_data1 [] = {
+		vertX[5],vertY[5],vertZ[5],
+		vertX[6],vertY[6],vertZ[6],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[5],vertY[5],vertZ[5]
+	};
+	GLfloat vertex_buffer_data2 [] = {
+		vertX[6],vertY[6],vertZ[6],
+		vertX[2],vertY[2],vertZ[2],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[6],vertY[6],vertZ[6]
+	};
+	GLfloat vertex_buffer_data3 [] = {
+		vertX[2],vertY[2],vertZ[2],
+		vertX[1],vertY[1],vertZ[1],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[2],vertY[2],vertZ[2]
+	};
+	GLfloat vertex_buffer_data4 [] = {
+		vertX[4],vertY[4],vertZ[4],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[4],vertY[4],vertZ[4]
+	};
+	GLfloat vertex_buffer_data5 [] = {
+		vertX[2],vertY[2],vertZ[2],
+		vertX[6],vertY[6],vertZ[6],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[1],vertY[1],vertZ[1],
+		vertX[2],vertY[2],vertZ[2]
+	};
+
+	GLuint textureID = createTexture("Images/top.png");
+	GLuint textureID1 = createTexture("Images/left1.png");
+	GLuint textureID2 = createTexture("Images/left2.png");
+	GLuint textureID3 = createTexture("Images/right.png");
+	GLuint textureID4 = createTexture("Images/bottom.png");
+	GLuint textureID5 = createTexture("Images/middle.png");
+
+	createRectangle (textureID5,vertex_buffer_data,"skybox");
+	createRectangle (textureID3,vertex_buffer_data1,"skybox1");
+	createRectangle (textureID1,vertex_buffer_data2,"skybox2");
+	createRectangle (textureID2,vertex_buffer_data3,"skybox3");
+	createRectangle (textureID,vertex_buffer_data4,"skybox4");
+	createRectangle (textureID4,vertex_buffer_data5,"skybox5");
 
 	float scale=0.7;
 
