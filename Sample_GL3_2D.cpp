@@ -165,6 +165,13 @@ string convertInt(int number)
     return returnvalue;
 }
 
+int check_collision_object(string name1,string name2){
+	if(objects[name2].status==1 && objects[name1].y>=objects[name2].y-objects[name2].y_scale/2-objects[name1].y_scale/2-50 && objects[name1].y<=objects[name2].y+objects[name2].y_scale/2+objects[name1].y_scale/2+50 && objects[name1].x>=objects[name2].x-objects[name2].x_scale/2-objects[name1].x_scale/2-20 && objects[name1].x<=objects[name2].x+objects[name2].x_scale/2+objects[name1].x_scale/2+20 && objects[name1].z>=objects[name2].z-objects[name2].z_scale/2-objects[name1].z_scale/2-20 && objects[name1].z<=objects[name2].z+objects[name2].z_scale/2+objects[name1].z_scale/2+20 ){
+		return 1;
+	}
+	return 0;
+}
+
 void goToNextLevel(GLFWwindow* window);
 
 GLuint programID, fontProgramID, textureProgramID;
@@ -876,52 +883,52 @@ int check_collision(){
 				string name = "floorcube";
 				name.append(convertInt(i)+convertInt(j)+convertInt(p));
 				//The character's legs are quite a bit lower, so we use -50 and +50 when checking y-collision
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 			}
 			//Check for elevator collision
 			if(gameMapTrap[i][j]==5){
 				string name="finishelevatorback";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="finishelevatorleft";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="finishelevatorright";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="finishelevatortop";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="finishelevatorbottom";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 			}
 			if(gameMapTrap[i][j]==6){
 				string name="startelevatorback";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="startelevatorleft";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="startelevatorright";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="startelevatortop";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				name="startelevatorbottom";
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					collided=1;
 				}
 				//Check y-axis collisions in the draw function itself
@@ -930,7 +937,7 @@ int check_collision(){
 			if(gameMapTrap[i][j]==2){
 				string name = "spike";
 				name.append(convertInt(i)+convertInt(j));
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					cout << "TRAP DEAD" << endl;
 				}
 			}
@@ -938,7 +945,7 @@ int check_collision(){
 			if(gameMapTrap[i][j]==3){
 				string name = "watertrap";
 				name.append(convertInt(i)+convertInt(j));
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					player_speed=0.8;
 					cout << "WATER TRAP" << endl;
 				}
@@ -947,7 +954,7 @@ int check_collision(){
 			if(gameMapTrap[i][j]==7){
 				string name = "star";
 				name.append(convertInt(i)+convertInt(j));
-				if(objects[name].status==1 && objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+				if(check_collision_object("player",name)){
 					objects[name].status=0;
 					cout << "FOUND A STAR" << endl;
 				}
@@ -1087,7 +1094,7 @@ void draw (GLFWwindow* window)
 					objects["player"].y-=5;
 					if(gameMapTrap[i][j]==5){
 						string name = "finishelevatorbottom";
-						if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+						if(check_collision_object("player",name)){
 							collided=1;
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
@@ -1097,7 +1104,7 @@ void draw (GLFWwindow* window)
 					}
 					if(gameMapTrap[i][j]==6){
 						string name = "startelevatorbottom";
-						if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+						if(check_collision_object("player",name)){
 							collided=1;
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
@@ -1108,7 +1115,7 @@ void draw (GLFWwindow* window)
 					string name = "floorcube";
 					name.append(convertInt(i)+convertInt(j)+convertInt(p));
 					//The character's legs are quite a bit lower, so we use -45 and +45 when checking y-collision
-					if(objects["player"].y>=objects[name].y-objects[name].y_scale/2-objects["player"].y_scale/2-50 && objects["player"].y<=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+50 && objects["player"].x>=objects[name].x-objects[name].x_scale/2-objects["player"].x_scale/2-20 && objects["player"].x<=objects[name].x+objects[name].x_scale/2+objects["player"].x_scale/2+20 && objects["player"].z>=objects[name].z-objects[name].z_scale/2-objects["player"].z_scale/2-20 && objects["player"].z<=objects[name].z+objects[name].z_scale/2+objects["player"].z_scale/2+20 ){
+					if(check_collision_object("player",name)){
 						collided=1;
 						objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 						objects["player"].y_speed=0;
@@ -1117,6 +1124,40 @@ void draw (GLFWwindow* window)
 					}
 					objects["player"].y+=5;
 				}
+			}
+		}
+	}
+
+	//Check for collisions with moving blocks even when you are not jumping
+	for(i=0;i<10;i++){
+		for(j=0;j<10;j++){
+			for(p=0;p<gameMap[i][j];p++){
+				objects["player"].y-=5;
+				string name = "floorcube";
+				name.append(convertInt(i)+convertInt(j)+convertInt(p));
+				//The character's legs are quite a bit lower, so we use -45 and +45 when checking y-collision
+				if(inAir==0){
+					if(check_collision_object("player",name)){
+						objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
+						objects["player"].y_speed=0;
+					}
+				}
+				if(objects[name].isMovingAnim!=0){
+					objects[name].dy=(objects[name].dy+1)%objects[name].isMovingAnim;
+					if(objects[name].dy<objects[name].isMovingAnim/2){
+						objects[name].y+=1;
+					}
+					else{
+						objects[name].y-=1;
+						objects["player"].y-=1;
+						//Check for collision and move the player down so that he doesn't keep jumping and stop jumping over and over again
+						if(check_collision_object("player",name)){
+							objects["player"].y-=1;
+						}
+						objects["player"].y+=1;
+					}
+				}
+				objects["player"].y+=5;
 			}
 		}
 	}
@@ -1630,6 +1671,17 @@ void initGL (GLFWwindow* window, int width, int height)
 						string name = "floorcube";
 						name.append(convertInt(i)+convertInt(j)+convertInt(p));
 						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
+					}
+				}
+				else if(gameMapTrap[i][j]<0){
+					int p;
+					for(p=0;p<gameMap[i][j];p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
+						if(p==gameMap[i][j]-1){
+							objects[name].isMovingAnim=-100*gameMapTrap[i][j];
+						}
 					}
 				}
 				else{
