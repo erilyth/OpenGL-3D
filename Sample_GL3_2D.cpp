@@ -968,6 +968,11 @@ int check_collision(){
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	if(objects["player"].y<-800){
+		cout << "Player Died" << endl;
+		currentLevel--;
+		goToNextLevel(window);
+	}
 	if(camera_follow==1){
 		target_x=objects["player"].x;
 		target_y=objects["player"].y;
