@@ -472,6 +472,7 @@ float target_x=-50,target_y,target_z=-50;
 float angle=0;
 float camera_radius;
 int left_mouse_clicked;
+int right_mouse_clicked;
 int camera_disable_rotation=0;
 
 int playerOnFinishElevator(){
@@ -634,9 +635,14 @@ void mouseButton (GLFWwindow* window, int button, int action, int mods)
 				break;
 			}
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			if (action == GLFW_RELEASE) {
-				rectangle_rot_dir *= -1;
-				goToNextLevel(window); //Takes you to the next level
+			if (action == GLFW_PRESS){
+				right_mouse_clicked=1;
+				break;
+			}
+			if (action == GLFW_RELEASE){
+				triangle_rot_dir *= -1;
+				right_mouse_clicked=0;
+				break;
 			}
 			break;
 		default:
@@ -964,6 +970,8 @@ int check_collision(){
 	return collided;
 }
 
+float previous_mouse_y,previous_mouse_x;
+
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
@@ -1228,9 +1236,20 @@ void draw (GLFWwindow* window)
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1 && camera_follow==0 && camera_disable_rotation==0){
-		angle+=1;
+		if(new_mouse_x<=350)
+			angle+=1;
+		else
+			angle-=1;
+		previous_mouse_x=new_mouse_x;
 		eye_x = -50+camera_radius*cos(angle*M_PI/180);
 		eye_z = -50+camera_radius*sin(angle*M_PI/180);
+	}
+	if(right_mouse_clicked && camera_follow==0 && camera_disable_rotation==0){
+		if (abs(previous_mouse_y-new_mouse_y)>=35)
+			previous_mouse_y = new_mouse_y;
+		else
+			eye_y += new_mouse_y - previous_mouse_y;
+		previous_mouse_y=new_mouse_y;
 	}
 	prev_mouse_x=new_mouse_x;
 	prev_mouse_y=new_mouse_y;
