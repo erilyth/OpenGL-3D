@@ -8,7 +8,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#include <pthread.h>
+#include <thread>
 #include <ao/ao.h>
 #include <mpg123.h>
 
@@ -103,8 +103,6 @@ struct Sprite {
 };
 typedef struct Sprite Sprite;
 
-string audioFile;
-pthread_t audioThread;
 map <string, Sprite> objects;
 map <string, Sprite> playerObjects;
 int player_moving=0;
@@ -119,6 +117,8 @@ int elevatorStartLevel=0;
 int elevatorFinishLevel=0;
 int timeToStartLevel=0;
 int timeToFinishLevel=0;
+
+void* play_audio(string audioFile);
 
 //The level specific map and trap map are loaded from files
 int gameMap[10][10]={
@@ -878,7 +878,7 @@ int justInAir=0;
 float player_speed=1.5;
 
 //Collision checks for gravity, falling etc are only done with the main blocks in the game (The "floorcube" blocks)
-int check_collision(){
+int check_collision(GLFWwindow* window){
 	int collided=0,i,j;
 	player_speed=1.5;
 	for(i=0;i<10;i++){
@@ -944,7 +944,8 @@ int check_collision(){
 				string name = "spike";
 				name.append(convertInt(i)+convertInt(j));
 				if(check_collision_object("player",name)){
-					cout << "TRAP DEAD" << endl;
+					currentLevel--;
+					goToNextLevel(window);
 				}
 			}
 			//Check water collision
@@ -962,6 +963,7 @@ int check_collision(){
 				name.append(convertInt(i)+convertInt(j));
 				if(check_collision_object("player",name)){
 					objects[name].status=0;
+					thread(play_audio,"Sounds/star.mp3").detach();
 					cout << "FOUND A STAR" << endl;
 				}
 			}
@@ -1029,6 +1031,7 @@ void draw (GLFWwindow* window)
 	}
 	
 	if(playerOnFinishElevator()==1 && elevatorFinishLevel==0){
+		thread(play_audio,"Sounds/finish.mp3").detach();
 		elevatorFinishLevel=100;
 	}
 	if(elevatorFinishLevel>1){
@@ -1036,7 +1039,8 @@ void draw (GLFWwindow* window)
 	}
 	if(elevatorFinishLevel==1){
 		if(timeToFinishLevel==0){
-			timeToFinishLevel=300;
+			timeToFinishLevel=150;
+			thread(play_audio,"Sounds/teleport.mp3").detach();
 		}
 		timeToFinishLevel--;
 		objects["finishelevatorbottom"].y+=2;
@@ -1076,7 +1080,7 @@ void draw (GLFWwindow* window)
 	if(trapTimer>=260)
 		trapTimer=0;
 	objects["player"].y-=5;
-	if(check_collision()!=1){
+	if(check_collision(window)!=1){
 		inAir=1;
 		playerObjects["playerhand"].angle_x=0;
 		playerObjects["playerhand2"].angle_x=0;
@@ -1180,11 +1184,11 @@ void draw (GLFWwindow* window)
 	}
 	if(player_moving!=0){
 		objects["player"].z+=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
-		if(check_collision()==1){
+		if(check_collision(window)==1){
 			objects["player"].z-=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
 		objects["player"].x+=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
-		if(check_collision()==1){
+		if(check_collision(window)==1){
 			objects["player"].x-=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
@@ -1796,11 +1800,12 @@ void goToNextLevel(GLFWwindow* window){
 	elevatorStartLevel=1;
     elevatorFinishLevel=0;
     timeToFinishLevel=0;
+    thread(play_audio,"Sounds/teleport.mp3").detach();
 	initGL(window,width,height);
 }
 
 //Set the audioFile parameter to the file name first before calling this function
-void* play_audio(void*){
+void* play_audio(string audioFile){
 	mpg123_handle *mh;
 	unsigned char *buffer;
 	size_t buffer_size;
@@ -1813,7 +1818,6 @@ void* play_audio(void*){
 	ao_sample_format format;
 	int channels, encoding;
 	long rate;
-
 
 	/* initializations */
 	ao_initialize();
@@ -1845,15 +1849,14 @@ void* play_audio(void*){
 	ao_close(dev);
 	mpg123_close(mh);
 	mpg123_delete(mh);
-	mpg123_exit();
-	ao_shutdown();
 }
 
 int main (int argc, char** argv)
 {
 	srand(time(NULL));
-	//audioFile="Sounds/trial.mp3";
-    //int audioThreadID = pthread_create(&audioThread, NULL, play_audio,NULL);
+
+    thread(play_audio,"Sounds/background.mp3").detach();
+
 	width = 700;
 	height = 700;
 	camera_radius=800;
@@ -1873,7 +1876,6 @@ int main (int argc, char** argv)
 
 	/* Draw in loop */
 	while (!glfwWindowShouldClose(window)) {
-
 		// OpenGL Draw commands
 		draw(window);
 
