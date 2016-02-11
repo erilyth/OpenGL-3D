@@ -1433,8 +1433,17 @@ void draw (GLFWwindow* window)
         GLint myUniformLocation = glGetUniformLocation(programID, "objectPosition");
 		glUniform3f(myUniformLocation,objects[current].x,objects[current].y,objects[current].z);
 
-        myUniformLocation = glGetUniformLocation(programID, "isPlayer");
-        glUniform1f(myUniformLocation,0.0);
+		if(current!="player"){
+        	myUniformLocation = glGetUniformLocation(programID, "isPlayer");
+        	glUniform1f(myUniformLocation,0.0);
+        }
+        else{
+            myUniformLocation = glGetUniformLocation(programID, "isPlayer");
+        	glUniform1f(myUniformLocation,1.0);	
+        }
+
+        myUniformLocation = glGetUniformLocation(programID, "playerAngleY");
+        glUniform1f(myUniformLocation,objects["player"].angle_y);
 
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
@@ -1484,6 +1493,9 @@ void draw (GLFWwindow* window)
 
         myUniformLocation = glGetUniformLocation(programID, "isPlayer");
         glUniform1f(myUniformLocation,1.0);
+
+        myUniformLocation = glGetUniformLocation(programID, "playerAngleY");
+        glUniform1f(myUniformLocation,objects["player"].angle_y);
 
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
