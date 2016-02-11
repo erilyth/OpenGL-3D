@@ -123,6 +123,7 @@ int elevatorFinishLevel=0;
 int timeToStartLevel=0;
 int timeToFinishLevel=0;
 
+void reshapeWindow (GLFWwindow* window, int width, int height);
 void* play_audio(string audioFile);
 
 //The level specific map and trap map are loaded from files
@@ -535,6 +536,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				target_z=objects["player"].z;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
+				camera_fov=1.3;
+				reshapeWindow(window,700,1400);
 				break;
 			case GLFW_KEY_Y:
 				camera_disable_rotation=0;
@@ -549,6 +552,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				target_z=-50;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
+				camera_fov=1.3;
+				reshapeWindow(window,700,1400);
 				break;
 			case GLFW_KEY_U:
 				camera_disable_rotation=1;
@@ -556,6 +561,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_follow=1;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
+				camera_fov=1.3;
+				reshapeWindow(window,700,1400);
 				break;
 			case GLFW_KEY_I:
 				camera_disable_rotation=1;
@@ -563,6 +570,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_fps=1;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
+				camera_fov=1.3;
+				reshapeWindow(window,700,1400);
 				break;
 			case GLFW_KEY_UP:
 				player_moving_forward=0;
@@ -740,7 +749,7 @@ void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
     if(camera_fov<=0.5){
     	camera_fov=0.5;
     }
-    reshapeWindow(window,700,700);
+    reshapeWindow(window,700,1400);
 }
 
 VAO *triangle, *skybox, *skybox1, *skybox2, *skybox3, *skybox4, *skybox5;
@@ -1352,7 +1361,7 @@ void draw (GLFWwindow* window)
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1 && camera_follow==0 && camera_disable_rotation==0){
-		if(new_mouse_x<=350)
+		if(new_mouse_x<=700)
 			angle+=1;
 		else
 			angle-=1;
