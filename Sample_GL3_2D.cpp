@@ -1905,7 +1905,7 @@ int main (int argc, char** argv)
 	old_time = time(NULL);
     thread(play_audio,"Sounds/background.mp3").detach();
 
-	width = 700;
+	width = 1400;
 	height = 700;
 	camera_radius=800;
 	angle=135;
