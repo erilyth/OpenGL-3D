@@ -105,7 +105,10 @@ typedef struct Sprite Sprite;
 
 map <string, Sprite> objects;
 map <string, Sprite> playerObjects;
-int player_moving=0;
+int player_moving_forward=0;
+int player_moving_backward=0;
+int player_moving_left=0;
+int player_moving_right=0;
 int player_rotating=0;
 float camera_fov=1.3;
 int currentLevel=0;
@@ -552,10 +555,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_fps=1;
 				break;
 			case GLFW_KEY_UP:
-				player_moving=0;
+				player_moving_forward=0;
 				break;
 			case GLFW_KEY_DOWN:
-				player_moving=0;
+				player_moving_backward=0;
+				break;
+			case GLFW_KEY_A:
+				player_moving_left=0;
+				break;
+			case GLFW_KEY_D:
+				player_moving_right=0;
 				break;
 			case GLFW_KEY_RIGHT:
 				player_rotating=0;
@@ -585,10 +594,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				player_rotating=-1; //The left key has a slight problem when used together with up or down and space.
 				break;
 			case GLFW_KEY_UP:
-				player_moving=1;
+				player_moving_forward=1;
 				break;
 			case GLFW_KEY_DOWN:
-				player_moving=-1;
+				player_moving_backward=1;
+				break;
+			case GLFW_KEY_A:
+				player_moving_left=1;
+				break;
+			case GLFW_KEY_D:
+				player_moving_right=1;
 				break;
 			case GLFW_KEY_SPACE:
 				if(inAir==0 && (playerOnStartElevator()==0 && playerOnFinishElevator()==0)){
@@ -685,8 +700,8 @@ void mousescroll(GLFWwindow* window, double xoffset, double yoffset)
     else if(yoffset==1){
         camera_fov/=1.1; //make it bigger than current size
     }
-    if(camera_fov>=3){
-    	camera_fov=3;
+    if(camera_fov>=2){
+    	camera_fov=2;
     }
     if(camera_fov<=0.5){
     	camera_fov=0.5;
@@ -1182,17 +1197,47 @@ void draw (GLFWwindow* window)
 	if(player_rotating!=0){
 		objects["player"].angle_y-=player_rotating*2;
 	}
-	if(player_moving!=0){
-		objects["player"].z+=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+	if(player_moving_forward!=0){
+		objects["player"].z+=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].z-=player_speed*player_moving*cos(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].z-=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
-		objects["player"].x+=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x+=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].x-=player_speed*player_moving*sin(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].x-=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
-	if(player_moving!=0 && !inAir){ //The player is not stationary
+	else if(player_moving_backward!=0){
+		objects["player"].z-=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].z+=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+		}
+		objects["player"].x-=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].x+=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+		}
+	}
+	else if(player_moving_left!=0){
+		objects["player"].z+=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].z-=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		}
+		objects["player"].x+=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].x-=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		}
+	}
+	else if(player_moving_right!=0){
+		objects["player"].z-=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].z+=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		}
+		objects["player"].x-=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		if(check_collision(window)==1){
+			objects["player"].x+=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		}
+	}
+	if((player_moving_forward!=0 || player_moving_backward!=0) && !inAir){ //The player is not stationary
 		if(playerObjects["playerhand"].direction_x==0){
 			playerObjects["playerhand"].angle_x+=2;
 			playerObjects["playerleg"].angle_x-=1.4;
@@ -1851,10 +1896,13 @@ void* play_audio(string audioFile){
 	mpg123_delete(mh);
 }
 
+time_t old_time;
+
 int main (int argc, char** argv)
 {
 	srand(time(NULL));
 
+	old_time = time(NULL);
     thread(play_audio,"Sounds/background.mp3").detach();
 
 	width = 700;
@@ -1876,6 +1924,11 @@ int main (int argc, char** argv)
 
 	/* Draw in loop */
 	while (!glfwWindowShouldClose(window)) {
+
+		if(time(NULL)-old_time>=93){
+			old_time=time(NULL);
+			thread(play_audio,"Sounds/background.mp3").detach();
+		}
 		// OpenGL Draw commands
 		draw(window);
 
