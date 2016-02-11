@@ -115,6 +115,8 @@ int currentLevel=0;
 int height,width;
 int camera_follow=0;
 int camera_fps=0;
+float fps_head_offset=0,fps_head_offset_x=0;
+int head_tilting=0;
 
 int elevatorStartLevel=0;
 int elevatorFinishLevel=0;
@@ -531,6 +533,8 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				target_x=objects["player"].x;
 				target_y=0;
 				target_z=objects["player"].z;
+				fps_head_offset=0;
+				fps_head_offset_x=0;
 				break;
 			case GLFW_KEY_Y:
 				camera_disable_rotation=0;
@@ -543,22 +547,34 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				target_x=-50;
 				target_y=0;
 				target_z=-50;
+				fps_head_offset=0;
+				fps_head_offset_x=0;
 				break;
 			case GLFW_KEY_U:
 				camera_disable_rotation=1;
 				camera_fps=0;
 				camera_follow=1;
+				fps_head_offset=0;
+				fps_head_offset_x=0;
 				break;
 			case GLFW_KEY_I:
 				camera_disable_rotation=1;
 				camera_follow=0;
 				camera_fps=1;
+				fps_head_offset=0;
+				fps_head_offset_x=0;
 				break;
 			case GLFW_KEY_UP:
 				player_moving_forward=0;
 				break;
 			case GLFW_KEY_DOWN:
 				player_moving_backward=0;
+				break;
+			case GLFW_KEY_W:
+				head_tilting=0;
+				break;
+			case GLFW_KEY_S:
+				head_tilting=0;
 				break;
 			case GLFW_KEY_A:
 				player_moving_left=0;
@@ -568,9 +584,11 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				break;
 			case GLFW_KEY_RIGHT:
 				player_rotating=0;
+				player_moving_right=0;
 				break;
 			case GLFW_KEY_LEFT:
 				player_rotating=0;
+				player_moving_left=0;
 				break;
 			case GLFW_KEY_C:
 				rectangle_rot_status = !rectangle_rot_status;
@@ -588,16 +606,32 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 	else if (action == GLFW_PRESS) {
 		switch (key) {
 			case GLFW_KEY_RIGHT:
-				player_rotating=1;
+				if(camera_fps==1){
+					player_moving_right=1;
+				}
+				else{
+					player_rotating=1;
+				}
 				break;
 			case GLFW_KEY_LEFT:
-				player_rotating=-1; //The left key has a slight problem when used together with up or down and space.
+				if(camera_fps==1){
+					player_moving_left=1;
+				}
+				else{
+					player_rotating=-1; //The left key has a slight problem when used together with up or down and space.
+				}
 				break;
 			case GLFW_KEY_UP:
 				player_moving_forward=1;
 				break;
 			case GLFW_KEY_DOWN:
 				player_moving_backward=1;
+				break;
+			case GLFW_KEY_W:
+				head_tilting=1;
+				break;
+			case GLFW_KEY_S:
+				head_tilting=-1;
 				break;
 			case GLFW_KEY_A:
 				player_moving_left=1;
@@ -988,6 +1022,7 @@ int check_collision(GLFWwindow* window){
 }
 
 float previous_mouse_y,previous_mouse_x;
+float previous_mouse_y2,previous_mouse_x2;
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -1007,12 +1042,44 @@ void draw (GLFWwindow* window)
 		eye_z=target_z-200*cos(objects["player"].angle_y*M_PI/180);
 	}
 	if(camera_fps==1){
-		target_x=objects["player"].x+40*sin(objects["player"].angle_y*M_PI/180);
-		target_y=objects["player"].y+60;
-		target_z=objects["player"].z+40*cos(objects["player"].angle_y*M_PI/180);
-		eye_x=target_x-10*sin(objects["player"].angle_y*M_PI/180);
-		eye_y=target_y;
-		eye_z=target_z-10*cos(objects["player"].angle_y*M_PI/180);
+		double new_mouse_x,new_mouse_y;
+		glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
+		if(abs(new_mouse_y-previous_mouse_y2)>=1){
+			fps_head_offset-=(new_mouse_y-previous_mouse_y2)/13;
+			previous_mouse_y2=new_mouse_y;
+		}
+		else if(new_mouse_y<=10 || new_mouse_y>=655){
+			if(new_mouse_y<=10){
+				fps_head_offset-=-0.3;
+			}
+			else{
+				fps_head_offset-=0.3;
+			}
+		}
+		if(abs(new_mouse_x-previous_mouse_x2)>=1){
+			objects["player"].angle_y-=(new_mouse_x-previous_mouse_x2)/8;
+			previous_mouse_x2=new_mouse_x;
+		}
+		else if(new_mouse_x<=10 || new_mouse_x>=1355){
+			if(new_mouse_x<=10){
+				objects["player"].angle_y+=1.5;
+			}
+			else{
+				objects["player"].angle_y-=1.5;
+			}
+		}
+		if(fps_head_offset>=30){
+			fps_head_offset=30;
+		}
+		if(fps_head_offset<=-30){
+			fps_head_offset=-30;
+		}
+		target_x=objects["player"].x+42*sin((objects["player"].angle_y)*M_PI/180);
+		target_y=objects["player"].y+60+fps_head_offset;
+		target_z=objects["player"].z+42*cos((objects["player"].angle_y)*M_PI/180);
+		eye_x=objects["player"].x+42*sin(objects["player"].angle_y*M_PI/180)-10*sin(objects["player"].angle_y*M_PI/180);
+		eye_y=objects["player"].y+60;
+		eye_z=objects["player"].z+42*cos(objects["player"].angle_y*M_PI/180)-10*cos(objects["player"].angle_y*M_PI/180);
 	}
 	int i,j;
 	for(i=0;i<10;i++){
@@ -1217,7 +1284,7 @@ void draw (GLFWwindow* window)
 			objects["player"].x+=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
-	else if(player_moving_left!=0){
+	if(player_moving_left!=0){
 		objects["player"].z+=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
 		if(check_collision(window)==1){
 			objects["player"].z-=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
