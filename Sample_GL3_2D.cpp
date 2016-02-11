@@ -180,7 +180,7 @@ int check_collision_object(string name1,string name2){
 
 void goToNextLevel(GLFWwindow* window);
 
-GLuint programID, fontProgramID, textureProgramID;
+GLuint programID, waterProgramID, fontProgramID, textureProgramID;
 
 /* Function to load Shaders - Use it as it is */
 GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path) {
@@ -1412,6 +1412,7 @@ void draw (GLFWwindow* window)
 	//Draw the objects
     for(map<string,Sprite>::iterator it=objects.begin();it!=objects.end();it++){
         string current = it->first; //The name of the current object
+        glUseProgram (programID);
         if(objects[current].status==0)
             continue;
         glm::mat4 MVP;  // MVP = Projection * View * Model
@@ -1429,11 +1430,20 @@ void draw (GLFWwindow* window)
         
         glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
+        GLint myUniformLocation = glGetUniformLocation(programID, "objectPosition");
+		glUniform3f(myUniformLocation,objects[current].x,objects[current].y,objects[current].z);
+
+        myUniformLocation = glGetUniformLocation(programID, "isPlayer");
+        glUniform1f(myUniformLocation,0.0);
+
+        myUniformLocation = glGetUniformLocation(programID, "playerPosition");
+        glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
+
         draw3DObject(objects[current].object);
         //glPopMatrix (); 
     }
 
-
+	glUseProgram (programID);
     //Draw the player
     for(map<string,Sprite>::iterator it=playerObjects.begin();it!=playerObjects.end();it++){
         string current = it->first; //The name of the current object
@@ -1469,6 +1479,15 @@ void draw (GLFWwindow* window)
         Matrices.model *= ObjectTransform;
         MVP = VP * Matrices.model; // MVP = p * V * M
         
+        GLint myUniformLocation = glGetUniformLocation(programID, "objectPosition");
+		glUniform3f(myUniformLocation,objects[current].x,objects[current].y,objects[current].z);
+
+        myUniformLocation = glGetUniformLocation(programID, "isPlayer");
+        glUniform1f(myUniformLocation,1.0);
+
+        myUniformLocation = glGetUniformLocation(programID, "playerPosition");
+        glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
+
         glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
         draw3DObject(playerObjects[current].object);
@@ -1479,6 +1498,8 @@ void draw (GLFWwindow* window)
 
 	// Render with texture shaders now
 	glUseProgram(textureProgramID);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Pop matrix to undo transformations till last push matrix instead of recomputing model matrix
 	// glPopMatrix ();
@@ -1512,6 +1533,8 @@ void draw (GLFWwindow* window)
 
 	// Use font Shaders for next part of code
 	glUseProgram(fontProgramID);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	Matrices.view = glm::lookAt(glm::vec3(0,0,3), glm::vec3(0,0,0), glm::vec3(0,1,0)); // Fixed camera for 2D (ortho) in XY plane
 
 	// Transform the text
@@ -1857,7 +1880,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	playerObjects["playerleg2"].rotation_y_offset=-30*scale;
 
 	// Create and compile our GLSL program from the shaders
-	programID = LoadShaders( "Sample_GL3.vert", "Sample_GL3.frag" );
+	programID = LoadShaders( "shader.vert", "shader.frag" );
+	waterProgramID = LoadShaders ( "watershader.vert", "watershader.frag");
 	// Get a handle for our "MVP" uniform
 	Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
 
@@ -1871,8 +1895,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	glEnable (GL_DEPTH_TEST);
 	glDepthFunc (GL_LEQUAL);
 	//glEnable(GL_LIGHTING);
-//	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Initialise FTGL stuff
 	//const char* fontfile = "/home/harsha/Classes/Two-2/Graphics/OGL3Sample2D/GLFW/GL3_Fonts_Textures/arial.ttf";
