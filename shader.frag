@@ -30,5 +30,6 @@ void main()
 	else{
 		outputColor = vTexColor;
 	}
+	outputColor = vec4(fragColor,1.0);
 }
 

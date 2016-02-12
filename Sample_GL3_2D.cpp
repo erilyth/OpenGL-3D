@@ -171,8 +171,9 @@ string convertInt(int number)
     return returnvalue;
 }
 
+//Check collision b/w a player and an object
 int check_collision_object(string name1,string name2){
-	if(objects[name2].status==1 && objects[name1].y>=objects[name2].y-objects[name2].y_scale/2-objects[name1].y_scale/2-50 && objects[name1].y<=objects[name2].y+objects[name2].y_scale/2+objects[name1].y_scale/2+50 && objects[name1].x>=objects[name2].x-objects[name2].x_scale/2-objects[name1].x_scale/2-20 && objects[name1].x<=objects[name2].x+objects[name2].x_scale/2+objects[name1].x_scale/2+20 && objects[name1].z>=objects[name2].z-objects[name2].z_scale/2-objects[name1].z_scale/2-20 && objects[name1].z<=objects[name2].z+objects[name2].z_scale/2+objects[name1].z_scale/2+20 ){
+	if(objects[name2].status==1 && objects[name1].y>=objects[name2].y-objects[name2].y_scale/2-objects[name1].y_scale/2-50 && objects[name1].y<=objects[name2].y+objects[name2].y_scale/2+objects[name1].y_scale/2+50 && objects[name1].x>=objects[name2].x-objects[name2].x_scale/2-objects[name1].x_scale/2-25 && objects[name1].x<=objects[name2].x+objects[name2].x_scale/2+objects[name1].x_scale/2+25 && objects[name1].z>=objects[name2].z-objects[name2].z_scale/2-objects[name1].z_scale/2-25 && objects[name1].z<=objects[name2].z+objects[name2].z_scale/2+objects[name1].z_scale/2+25 ){
 		return 1;
 	}
 	return 0;
@@ -651,7 +652,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 			case GLFW_KEY_SPACE:
 				if(inAir==0 && (playerOnStartElevator()==0 && playerOnFinishElevator()==0)){
 					//Dont let the person jump when inside the elevator
-					objects["player"].y_speed=10;
+					objects["player"].y_speed=13;
 					objects["player"].y+=5;
 					inAir=1;
 				}
@@ -1212,6 +1213,26 @@ void draw (GLFWwindow* window)
 					}
 					if(gameMapTrap[i][j]==6){
 						string name = "startelevatorbottom";
+						if(check_collision_object("player",name)){
+							collided=1;
+							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
+							objects["player"].y_speed=0;
+							inAir=0;
+							justInAir=1;
+						}
+					}
+					if(gameMapTrap[i][j]==5){
+						string name = "finishelevatortop";
+						if(check_collision_object("player",name)){
+							collided=1;
+							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
+							objects["player"].y_speed=0;
+							inAir=0;
+							justInAir=1;
+						}
+					}
+					if(gameMapTrap[i][j]==6){
+						string name = "startelevatortop";
 						if(check_collision_object("player",name)){
 							collided=1;
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
@@ -1796,7 +1817,7 @@ void initGL (GLFWwindow* window, int width, int height)
 				else if(gameMapTrap[i][j]==4){
 					string new_name="stone";
 					new_name.append(convertInt(i)+convertInt(j));
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+10,(i-5)*150,200,200,200,"Models/stone.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+2,(i-5)*150,200,200,200,"Models/stone.data","");
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
