@@ -482,6 +482,8 @@ int left_mouse_clicked;
 int right_mouse_clicked;
 int camera_disable_rotation=0;
 
+int player_sprint=0;
+
 int playerOnFinishElevator(){
 	int onElevator=0,i,j,k;
 	for(i=0;i<10;i++){
@@ -531,7 +533,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_radius=1; //Top view
 				eye_x = objects["player"].x+camera_radius*cos(angle*M_PI/180);
 				eye_z = objects["player"].z+camera_radius*sin(angle*M_PI/180);
-				eye_y=600;
+				eye_y=1100;
 				target_x=objects["player"].x;
 				target_y=0;
 				target_z=objects["player"].z;
@@ -547,7 +549,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_radius=800; //Tower view
 				eye_x = -50+camera_radius*cos(angle*M_PI/180);
 				eye_z = -50+camera_radius*sin(angle*M_PI/180);
-				eye_y=600;
+				eye_y=1100;
 				target_x=-50;
 				target_y=0;
 				target_z=-50;
@@ -573,6 +575,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				fps_head_offset_x=0;
 				camera_fov=1.3;
 				reshapeWindow(window,700,1400);
+				break;
+			case GLFW_KEY_Z:
+				player_sprint=0;
 				break;
 			case GLFW_KEY_UP:
 				player_moving_forward=0;
@@ -630,6 +635,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				else{
 					player_rotating=-1; //The left key has a slight problem when used together with up or down and space.
 				}
+				break;
+			case GLFW_KEY_Z:
+				player_sprint=1;
 				break;
 			case GLFW_KEY_UP:
 				player_moving_forward=1;
@@ -1295,43 +1303,43 @@ void draw (GLFWwindow* window)
 		objects["player"].angle_y-=player_rotating*2;
 	}
 	if(player_moving_forward!=0){
-		objects["player"].z+=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].z+=(1+player_sprint)*player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].z-=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].z-=(1+player_sprint)*player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
-		objects["player"].x+=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x+=(1+player_sprint)*player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].x-=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].x-=(1+player_sprint)*player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
 	else if(player_moving_backward!=0){
-		objects["player"].z-=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].z-=(1+player_sprint)*player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].z+=player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].z+=(1+player_sprint)*player_speed*cos(objects["player"].angle_y*M_PI/180)*2;
 		}
-		objects["player"].x-=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+		objects["player"].x-=(1+player_sprint)*player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].x+=player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
+			objects["player"].x+=(1+player_sprint)*player_speed*sin(objects["player"].angle_y*M_PI/180)*2;
 		}
 	}
 	if(player_moving_left!=0){
-		objects["player"].z+=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		objects["player"].z+=(1+player_sprint)*player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].z-=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+			objects["player"].z-=(1+player_sprint)*player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
 		}
-		objects["player"].x+=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		objects["player"].x+=(1+player_sprint)*player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].x-=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+			objects["player"].x-=(1+player_sprint)*player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
 		}
 	}
 	else if(player_moving_right!=0){
-		objects["player"].z-=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+		objects["player"].z-=(1+player_sprint)*player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].z+=player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
+			objects["player"].z+=(1+player_sprint)*player_speed*cos((objects["player"].angle_y+90)*M_PI/180)*2;
 		}
-		objects["player"].x-=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+		objects["player"].x-=(1+player_sprint)*player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
 		if(check_collision(window)==1){
-			objects["player"].x+=player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
+			objects["player"].x+=(1+player_sprint)*player_speed*sin((objects["player"].angle_y+90)*M_PI/180)*2;
 		}
 	}
 	if((player_moving_forward!=0 || player_moving_backward!=0) && !inAir){ //The player is not stationary
@@ -1778,7 +1786,7 @@ void initGL (GLFWwindow* window, int width, int height)
 				if(gameMapTrap[i][j]==2){
 					string name2 = "floortrap";
 					name2.append(convertInt(i)+convertInt(j));
-					createModel(name2,(j-5)*150,gameMap[i][j]*150-75+25,(i-5)*150,70,70,70,"Models/floortrap.data","");
+					createModel(name2,(j-5)*150,gameMap[i][j]*150-75+28,(i-5)*150,70,70,70,"Models/floortrap.data","");
 					string new_name="spike";
 					new_name.append(convertInt(i)+convertInt(j));
 					createModel (new_name,(j-5)*150,gameMap[i][j]*150-75,(i-5)*150,70,70,70,"Models/spike.data","");
@@ -1912,6 +1920,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	playerObjects["playerleg"].rotation_y_offset=-30*scale;
 	playerObjects["playerleg2"].rotation_y_offset=-30*scale;
 
+	objects["player"].angle_y=-90;
+
 	// Create and compile our GLSL program from the shaders
 	programID = LoadShaders( "shader.vert", "shader.frag" );
 	waterProgramID = LoadShaders ( "watershader.vert", "watershader.frag");
@@ -2043,7 +2053,7 @@ int main (int argc, char** argv)
 	camera_radius=800;
 	angle=135;
 	eye_x = -50+camera_radius*cos(angle*M_PI/180);
-	eye_y = 600;
+	eye_y = 1100;
     eye_z = -50+camera_radius*sin(angle*M_PI/180);
 
 	GLFWwindow* window = initGLFW(width, height);
