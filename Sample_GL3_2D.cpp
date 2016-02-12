@@ -117,6 +117,7 @@ int camera_follow=0;
 int camera_fps=0;
 float fps_head_offset=0,fps_head_offset_x=0;
 int head_tilting=0;
+int isNight=0;
 
 int elevatorStartLevel=0;
 int elevatorFinishLevel=0;
@@ -526,6 +527,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
+			case GLFW_KEY_N:
+				isNight=1-isNight;
+				break;
 			case GLFW_KEY_T:
 				camera_disable_rotation=1;
 				camera_follow=0;
@@ -1477,6 +1481,9 @@ void draw (GLFWwindow* window)
         myUniformLocation = glGetUniformLocation(programID, "playerAngleXZ");
         glUniform1f(myUniformLocation,-fps_head_offset);
 
+        myUniformLocation = glGetUniformLocation(programID, "isNight");
+        glUniform1f(myUniformLocation,isNight);
+
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
 
@@ -1531,6 +1538,9 @@ void draw (GLFWwindow* window)
 
         myUniformLocation = glGetUniformLocation(programID, "playerAngleXZ");
         glUniform1f(myUniformLocation,-fps_head_offset);
+
+        myUniformLocation = glGetUniformLocation(programID, "isNight");
+        glUniform1f(myUniformLocation,isNight);
 
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
