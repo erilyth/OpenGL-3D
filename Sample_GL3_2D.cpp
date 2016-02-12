@@ -529,6 +529,12 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 		switch (key) {
 			case GLFW_KEY_N:
 				isNight=1-isNight;
+				if(isNight==1){
+					playerObjects["playerhat"].status=1;
+				}
+				else{
+					playerObjects["playerhat"].status=0;
+				}
 				break;
 			case GLFW_KEY_T:
 				camera_disable_rotation=1;
@@ -1931,11 +1937,17 @@ void initGL (GLFWwindow* window, int width, int height)
 	createModel("playerhand2",-49*scale,-2*scale,0,16*scale,32*scale,16*scale,"Models/hand.data","player");
 	createModel("playerleg",15*scale,-68*scale,0,15*scale,48*scale,15*scale,"Models/leg.data","player");
 	createModel("playerleg2",-15*scale,-68*scale,0,15*scale,48*scale,15*scale,"Models/leg.data","player");
+	createModel("playerhat",0,100*scale,0,30*scale,30*scale,30*scale,"Models/lighthat.data","player");
 	playerObjects["playerhand"].rotation_y_offset=-30*scale; //So that the rotation of the hand swinging is done on the top of the hand
 	playerObjects["playerhand2"].rotation_y_offset=-30*scale;
 	playerObjects["playerleg"].rotation_y_offset=-30*scale;
 	playerObjects["playerleg2"].rotation_y_offset=-30*scale;
 
+	playerObjects["playerhat"].angle_y=-90;
+	if(!isNight)
+		playerObjects["playerhat"].status=0;
+	else
+		playerObjects["playerhat"].status=1;
 	objects["player"].angle_y=-90;
 
 	// Create and compile our GLSL program from the shaders

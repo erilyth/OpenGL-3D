@@ -26,8 +26,11 @@ void main()
 	else if(angle<=0 && angle>=-110){
 		intensity=angle+110;		
 	}
+    float remLight=1;
+    if(intensity==0)
+        remLight=0;
 	if(playercheck!=1.0){
-		outputColor = vTexColor*vec4(vec3(2,2,2)*((0.5+fDiffuseIntensity)*intensity/90-(distance(vertexPosition,playerPosition1)/1000.0)*0.2), 1.0);
+		outputColor = vTexColor*vec4(vec3(2,2,2)*((0.5+fDiffuseIntensity)*intensity/90-remLight*(distance(vertexPosition,playerPosition1)/1000.0)*0.2), 1.0);
 	}
 	else{
 		outputColor = vTexColor;
