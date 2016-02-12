@@ -5,6 +5,7 @@ in vec3 vertexPosition;
 in float playercheck;
 in vec3 playerPosition1;
 in float playerYAngle;
+in float playerXZAngle;
 
 out vec4 outputColor;
 
@@ -13,7 +14,7 @@ uniform vec4 vColor;
 void main()
 {	
 	vec4 vTexColor = vec4(fragColor,1.0);
-	vec3 playerDirection = vec3(10*sin(3.14/180*playerYAngle),0,10*cos(3.14/180*playerYAngle));
+	vec3 playerDirection = vec3(10*sin(3.14/180*playerYAngle),-playerXZAngle,10*cos(3.14/180*playerYAngle));
 	vec3 vertexDirection = vertexPosition-playerPosition1-vec3(0,+20,0);
 	float angle = acos(dot(playerDirection,vertexDirection)/(length(playerDirection)*length(vertexDirection)))*180;
 	float fDiffuseIntensity = max(0.0, dot(normalize(vec3(0,1,0)), vec3(-1,-1,-1)));

@@ -1474,6 +1474,9 @@ void draw (GLFWwindow* window)
         myUniformLocation = glGetUniformLocation(programID, "playerAngleY");
         glUniform1f(myUniformLocation,objects["player"].angle_y);
 
+        myUniformLocation = glGetUniformLocation(programID, "playerAngleXZ");
+        glUniform1f(myUniformLocation,-fps_head_offset);
+
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
 
@@ -1525,6 +1528,9 @@ void draw (GLFWwindow* window)
 
         myUniformLocation = glGetUniformLocation(programID, "playerAngleY");
         glUniform1f(myUniformLocation,objects["player"].angle_y);
+
+        myUniformLocation = glGetUniformLocation(programID, "playerAngleXZ");
+        glUniform1f(myUniformLocation,-fps_head_offset);
 
         myUniformLocation = glGetUniformLocation(programID, "playerPosition");
         glUniform3f(myUniformLocation,objects["player"].x,objects["player"].y+60,objects["player"].z);
