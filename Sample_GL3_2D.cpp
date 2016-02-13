@@ -105,6 +105,8 @@ typedef struct Sprite Sprite;
 
 map <string, Sprite> objects;
 map <string, Sprite> playerObjects;
+int player_score=0;
+int player_health=100;
 int player_moving_forward=0;
 int player_moving_backward=0;
 int player_moving_left=0;
@@ -1023,8 +1025,11 @@ int check_collision(GLFWwindow* window){
 				string name = "spike";
 				name.append(convertInt(i)+convertInt(j));
 				if(check_collision_object("player",name)){
-					currentLevel--;
-					goToNextLevel(window);
+					player_health-=1;
+					if(player_health<=0){
+						currentLevel--;
+						goToNextLevel(window);
+					}
 				}
 			}
 			//Check water collision
@@ -1043,6 +1048,7 @@ int check_collision(GLFWwindow* window){
 				if(check_collision_object("player",name)){
 					objects[name].status=0;
 					thread(play_audio,"Sounds/star.mp3").detach();
+					player_score+=10;
 					cout << "FOUND A STAR" << endl;
 				}
 			}
@@ -1139,6 +1145,8 @@ void draw (GLFWwindow* window)
 {
 	if(objects["player"].y<-800){
 		cout << "Player Died" << endl;
+		player_score-=50;
+		player_score=max(0,player_score);
 		currentLevel--;
 		goToNextLevel(window);
 	}
@@ -1232,6 +1240,7 @@ void draw (GLFWwindow* window)
 		if(timeToFinishLevel==0){
 			timeToFinishLevel=150;
 			thread(play_audio,"Sounds/teleport.mp3").detach();
+			player_score+=50;
 		}
 		timeToFinishLevel--;
 		objects["finishelevatorbottom"].y+=2;
@@ -1673,7 +1682,7 @@ void draw (GLFWwindow* window)
 
 	// Render font on screen
 	float fontScaleValue = 0.75 + 0.25*sinf(fontScale*M_PI/180.0f);
-	glm::vec3 fontColor = getRGBfromHue (fontScale);
+	glm::vec3 fontColor = glm::vec3(200,200,200);
 
 	// Use font Shaders for next part of code
 	glUseProgram(fontProgramID);
@@ -1683,26 +1692,56 @@ void draw (GLFWwindow* window)
 
 	// Transform the text
 	Matrices.model = glm::mat4(1.0f);
-	glm::mat4 translateText = glm::translate(glm::vec3(-3,2,0));
-	glm::mat4 scaleText = glm::scale(glm::vec3(fontScaleValue,fontScaleValue,fontScaleValue));
+	glm::mat4 translateText = glm::translate(glm::vec3(3.4,1.7,0.1));
+	glm::mat4 scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
 	// send font's MVP and font color to fond shaders
 	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
 	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
+	string score_string = to_string(player_score);
+	const char *score_text=score_string.c_str();
+
+	string health_string = to_string(player_health);
+	const char *health_text=health_string.c_str();
 	// Render font
-	//GL3Font.font->Render("Round n Round we go !!");
+	if(camera_fov<=1.4 && camera_fov>=1.2)
+		GL3Font.font->Render(score_text);
 
+	Matrices.model = glm::mat4(1.0f);
+	translateText = glm::translate(glm::vec3(-2.8,1.7,0.1));
+	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
+	Matrices.model *= (translateText * scaleText);
+	MVP = Matrices.projection * Matrices.view * Matrices.model;
+	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
+	if(camera_fov<=1.4 && camera_fov>=1.2)
+		GL3Font.font->Render(health_text);
 
+	Matrices.model = glm::mat4(1.0f);
+	translateText = glm::translate(glm::vec3(-4,1.7,0.1));
+	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
+	Matrices.model *= (translateText * scaleText);
+	MVP = Matrices.projection * Matrices.view * Matrices.model;
+	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
-	//camera_rotation_angle++; // Simulating camera rotation
-	triangle_rotation = triangle_rotation + increments*triangle_rot_dir*triangle_rot_status;
-	rectangle_rotation = rectangle_rotation + increments*rectangle_rot_dir*rectangle_rot_status;
+	if(camera_fov<=1.4 && camera_fov>=1.2)
+		GL3Font.font->Render("Health: ");
 
-	// font size and color changes
-	fontScale = (fontScale + 1) % 360;
+	Matrices.model = glm::mat4(1.0f);
+	translateText = glm::translate(glm::vec3(2.35,1.7,0.1));
+	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
+	Matrices.model *= (translateText * scaleText);
+	MVP = Matrices.projection * Matrices.view * Matrices.model;
+	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+
+	if(camera_fov<=1.4 && camera_fov>=1.2)
+		GL3Font.font->Render("Score: ");
+
 }
 
 /* Initialise glfw window, I/O callbacks and the renderer to use */
@@ -1987,7 +2026,7 @@ void initGL (GLFWwindow* window, int width, int height)
 
 	// Initialise FTGL stuff
 	//const char* fontfile = "/home/harsha/Classes/Two-2/Graphics/OGL3Sample2D/GLFW/GL3_Fonts_Textures/arial.ttf";
-	const char* fontfile = "Fonts/arial.ttf";
+	const char* fontfile = "Fonts/OpenSans-Semibold.ttf";
 	GL3Font.font = new FTExtrudeFont(fontfile); // 3D extrude style rendering
 
 	if(GL3Font.font->Error())
@@ -2020,7 +2059,8 @@ void initGL (GLFWwindow* window, int width, int height)
 }
 
 void goToNextLevel(GLFWwindow* window){
-	currentLevel++; 
+	currentLevel++;
+	player_health=100;
 	//If next level does not exist, then the arrays will not be updated and you will be shown the last level again
 	timeToStartLevel=150;
 	timeToFinishLevel=0;
