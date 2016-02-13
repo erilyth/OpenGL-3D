@@ -116,10 +116,14 @@ float camera_fov=1.3;
 int currentLevel=0;
 int height,width;
 int camera_follow=0;
+int camera_top=0;
 int camera_fps=0;
 float fps_head_offset=0,fps_head_offset_x=0;
 int head_tilting=0;
 int isNight=0;
+int super_jump_mode=0;
+int current_jump=0;
+int powerup_timer=0;
 
 int elevatorStartLevel=0;
 int elevatorFinishLevel=0;
@@ -545,6 +549,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_follow=0;
 				camera_fps=0;
 				camera_radius=1; //Top view
+				camera_top=1;
 				eye_x = objects["player"].x+camera_radius*cos(angle*M_PI/180);
 				eye_z = objects["player"].z+camera_radius*sin(angle*M_PI/180);
 				eye_y=1100;
@@ -560,6 +565,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_disable_rotation=0;
 				camera_follow=0;
 				camera_fps=0;
+				camera_top=0;
 				camera_radius=800; //Tower view
 				eye_x = -50+camera_radius*cos(angle*M_PI/180);
 				eye_z = -50+camera_radius*sin(angle*M_PI/180);
@@ -575,6 +581,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 			case GLFW_KEY_U:
 				camera_disable_rotation=1;
 				camera_fps=0;
+				camera_top=0;
 				camera_follow=1;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
@@ -585,6 +592,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_disable_rotation=1;
 				camera_follow=0;
 				camera_fps=1;
+				camera_top=0;
 				fps_head_offset=0;
 				fps_head_offset_x=0;
 				camera_fov=1.3;
@@ -672,9 +680,16 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				player_moving_right=1;
 				break;
 			case GLFW_KEY_SPACE:
-				if(inAir==0 && (playerOnStartElevator()==0 && playerOnFinishElevator()==0)){
+				if(((super_jump_mode==1 && current_jump==0) || inAir==0) && (playerOnStartElevator()==0 && playerOnFinishElevator()==0)){
 					//Dont let the person jump when inside the elevator
-					objects["player"].y_speed=13;
+					if(inAir!=0)
+						current_jump=1;
+					else
+						current_jump=0;
+					if(super_jump_mode)
+						objects["player"].y_speed=15;
+					else
+						objects["player"].y_speed=13;
 					objects["player"].y+=5;
 					inAir=1;
 				}
@@ -1052,6 +1067,20 @@ int check_collision(GLFWwindow* window){
 					cout << "FOUND A STAR" << endl;
 				}
 			}
+			//Check powerup collision
+			if(gameMapTrap[i][j]==8){
+				string name = "powerup";
+				name.append(convertInt(i)+convertInt(j));
+				if(check_collision_object("player",name)){
+					objects[name].status=0;
+					thread(play_audio,"Sounds/powerup.mp3").detach();
+					player_score+=20;
+					cout << "FOUND A POWERUP" << endl;
+					super_jump_mode=1;
+					powerup_timer=600; //Approx 10 seconds
+					current_jump=0;
+				}
+			}
 		}
 	}
 	return collided;
@@ -1064,7 +1093,7 @@ int previous=0;
 void create_skybox(){
 	//Creating the sky box
 	float vertX[]={0,-1500,-1500,-1500,-1500,1500,1500,1500,1500};
-	float vertY[]={0,-1500,-1500,1500,1500,-1500,-1500,1500,1500};
+	float vertY[]={0,-1200,-1200,1800,1800,-1200,-1200,1800,1800};
 	float vertZ[]={0,-1500,1500,-1500,1500,-1500,1500,-1500,1500};
 	GLfloat vertex_buffer_data [] = {
 		vertX[1],vertY[1],vertZ[1],
@@ -1143,12 +1172,28 @@ void create_skybox(){
 /* Edit this function according to your assignment */
 void draw (GLFWwindow* window)
 {
+	if(powerup_timer!=0){
+		powerup_timer-=1;
+		if(powerup_timer==0){
+			super_jump_mode=0;
+			current_jump=0;
+		}
+	}
 	if(objects["player"].y<-800){
 		cout << "Player Died" << endl;
+		super_jump_mode=0;
 		player_score-=50;
 		player_score=max(0,player_score);
 		currentLevel--;
 		goToNextLevel(window);
+	}
+	if(camera_top){
+		eye_x = objects["player"].x+camera_radius*cos(angle*M_PI/180);
+		eye_z = objects["player"].z+camera_radius*sin(angle*M_PI/180);
+		eye_y=1100;
+		target_x=objects["player"].x;
+		target_y=0;
+		target_z=objects["player"].z;
 	}
 	if(camera_follow==1){
 		target_x=objects["player"].x;
@@ -1211,6 +1256,9 @@ void draw (GLFWwindow* window)
 				objects[temp].y-=0.4;
 			}
 			objects[temp].isMovingAnim=(objects[temp].isMovingAnim+1)%101;
+			temp="powerup";
+			temp.append(convertInt(i)+convertInt(j));
+			objects[temp].angle_y+=2;
 		}
 	}
 	if(elevatorStartLevel==1){
@@ -1912,7 +1960,7 @@ void initGL (GLFWwindow* window, int width, int height)
 				}
 				else if(gameMapTrap[i][j]==5){ //Elevator needs 3 blocks space for doors to open
 					string new_name = "finishelevator";
-					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+79,(i-5)*150,70,100,70,"Models/elevator.data","");
+					createModel (new_name,(j-5)*150,(gameMap[i][j])*150+81,(i-5)*150,70,100,70,"Models/elevator.data","");
 					string elevatorblock = new_name+"back";
 					createModel (elevatorblock,(j-5)*150+51,(gameMap[i][j])*150+78,(i-5)*150,10,150,130,"Models/cube.data","");
 					elevatorblock = new_name+"left";
@@ -1956,6 +2004,17 @@ void initGL (GLFWwindow* window, int width, int height)
 					string new_name = "star";
 					new_name.append(convertInt(i)+convertInt(j));
 					createModel (new_name,(j-5)*150,gameMap[i][j]*150+75,(i-5)*150,20,20,20,"Models/star.data","");
+					int p;
+					for(p=0;p<gameMap[i][j];p++){
+						string name = "floorcube";
+						name.append(convertInt(i)+convertInt(j)+convertInt(p));
+						createModel (name,(j-5)*150,p*150+150/2,(i-5)*150,150,150,150,"Models/cube.data","");
+					}
+				}
+				else if(gameMapTrap[i][j]==8){
+					string new_name = "powerup";
+					new_name.append(convertInt(i)+convertInt(j));
+					createModel (new_name,(j-5)*150,gameMap[i][j]*150+75,(i-5)*150,30,30,30,"Models/powerup.data","");
 					int p;
 					for(p=0;p<gameMap[i][j];p++){
 						string name = "floorcube";
