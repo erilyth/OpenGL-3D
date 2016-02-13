@@ -126,6 +126,7 @@ int timeToFinishLevel=0;
 
 void reshapeWindow (GLFWwindow* window, int width, int height);
 void* play_audio(string audioFile);
+void create_skybox();
 
 //The level specific map and trap map are loaded from files
 int gameMap[10][10]={
@@ -535,6 +536,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				else{
 					playerObjects["playerhat"].status=0;
 				}
+				create_skybox();
 				break;
 			case GLFW_KEY_T:
 				camera_disable_rotation=1;
@@ -1051,6 +1053,85 @@ int check_collision(GLFWwindow* window){
 
 float previous_mouse_y,previous_mouse_x;
 float previous_mouse_y2,previous_mouse_x2;
+int previous=0;
+
+void create_skybox(){
+	//Creating the sky box
+	float vertX[]={0,-1500,-1500,-1500,-1500,1500,1500,1500,1500};
+	float vertY[]={0,-1500,-1500,1500,1500,-1500,-1500,1500,1500};
+	float vertZ[]={0,-1500,1500,-1500,1500,-1500,1500,-1500,1500};
+	GLfloat vertex_buffer_data [] = {
+		vertX[1],vertY[1],vertZ[1],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[1],vertY[1],vertZ[1]
+	};
+	GLfloat vertex_buffer_data1 [] = {
+		vertX[5],vertY[5],vertZ[5],
+		vertX[6],vertY[6],vertZ[6],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[5],vertY[5],vertZ[5]
+	};
+	GLfloat vertex_buffer_data2 [] = {
+		vertX[6],vertY[6],vertZ[6],
+		vertX[2],vertY[2],vertZ[2],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[6],vertY[6],vertZ[6]
+	};
+	GLfloat vertex_buffer_data3 [] = {
+		vertX[2],vertY[2],vertZ[2],
+		vertX[1],vertY[1],vertZ[1],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[4],vertY[4],vertZ[4],
+		vertX[2],vertY[2],vertZ[2]
+	};
+	GLfloat vertex_buffer_data4 [] = {
+		vertX[4],vertY[4],vertZ[4],
+		vertX[8],vertY[8],vertZ[8],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[7],vertY[7],vertZ[7],
+		vertX[3],vertY[3],vertZ[3],
+		vertX[4],vertY[4],vertZ[4]
+	};
+	GLfloat vertex_buffer_data5 [] = {
+		vertX[2],vertY[2],vertZ[2],
+		vertX[6],vertY[6],vertZ[6],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[5],vertY[5],vertZ[5],
+		vertX[1],vertY[1],vertZ[1],
+		vertX[2],vertY[2],vertZ[2]
+	};
+
+	GLuint textureID = createTexture("Images/nighttop.png");
+	GLuint textureID1 = createTexture("Images/nightside.png");
+	GLuint textureID2 = createTexture("Images/nightside2.png");
+	GLuint textureID3 = createTexture("Images/nightside.png");
+	GLuint textureID4 = createTexture("Images/nightbottom.png");
+	GLuint textureID5 = createTexture("Images/nightside.png");
+
+	if(!isNight){
+		textureID = createTexture("Images/top.png");
+		textureID1 = createTexture("Images/left1.png");
+		textureID2 = createTexture("Images/left2.png");
+		textureID3 = createTexture("Images/right.png");
+		textureID4 = createTexture("Images/bottom.png");
+		textureID5 = createTexture("Images/middle.png");
+	}
+
+	createRectangle (textureID5,vertex_buffer_data,"skybox");
+	createRectangle (textureID3,vertex_buffer_data1,"skybox1");
+	createRectangle (textureID1,vertex_buffer_data2,"skybox2");
+	createRectangle (textureID2,vertex_buffer_data3,"skybox3");
+	createRectangle (textureID,vertex_buffer_data4,"skybox4");
+	createRectangle (textureID4,vertex_buffer_data5,"skybox5");
+}
 
 /* Render the scene with openGL */
 /* Edit this function according to your assignment */
@@ -1730,73 +1811,8 @@ void initGL (GLFWwindow* window, int width, int height)
 	/* Objects should be created before any other gl function and shaders */
 	// Create the models
 	//createTriangle (); // Generate the VAO, VBOs, vertices data & copy into the array buffer
-	
-	//Creating the sky box
-	float vertX[]={0,-1500,-1500,-1500,-1500,1500,1500,1500,1500};
-	float vertY[]={0,-1500,-1500,1500,1500,-1500,-1500,1500,1500};
-	float vertZ[]={0,-1500,1500,-1500,1500,-1500,1500,-1500,1500};
-	GLfloat vertex_buffer_data [] = {
-		vertX[1],vertY[1],vertZ[1],
-		vertX[5],vertY[5],vertZ[5],
-		vertX[7],vertY[7],vertZ[7],
-		vertX[7],vertY[7],vertZ[7],
-		vertX[3],vertY[3],vertZ[3],
-		vertX[1],vertY[1],vertZ[1]
-	};
-	GLfloat vertex_buffer_data1 [] = {
-		vertX[5],vertY[5],vertZ[5],
-		vertX[6],vertY[6],vertZ[6],
-		vertX[8],vertY[8],vertZ[8],
-		vertX[8],vertY[8],vertZ[8],
-		vertX[7],vertY[7],vertZ[7],
-		vertX[5],vertY[5],vertZ[5]
-	};
-	GLfloat vertex_buffer_data2 [] = {
-		vertX[6],vertY[6],vertZ[6],
-		vertX[2],vertY[2],vertZ[2],
-		vertX[4],vertY[4],vertZ[4],
-		vertX[4],vertY[4],vertZ[4],
-		vertX[8],vertY[8],vertZ[8],
-		vertX[6],vertY[6],vertZ[6]
-	};
-	GLfloat vertex_buffer_data3 [] = {
-		vertX[2],vertY[2],vertZ[2],
-		vertX[1],vertY[1],vertZ[1],
-		vertX[3],vertY[3],vertZ[3],
-		vertX[3],vertY[3],vertZ[3],
-		vertX[4],vertY[4],vertZ[4],
-		vertX[2],vertY[2],vertZ[2]
-	};
-	GLfloat vertex_buffer_data4 [] = {
-		vertX[4],vertY[4],vertZ[4],
-		vertX[8],vertY[8],vertZ[8],
-		vertX[7],vertY[7],vertZ[7],
-		vertX[7],vertY[7],vertZ[7],
-		vertX[3],vertY[3],vertZ[3],
-		vertX[4],vertY[4],vertZ[4]
-	};
-	GLfloat vertex_buffer_data5 [] = {
-		vertX[2],vertY[2],vertZ[2],
-		vertX[6],vertY[6],vertZ[6],
-		vertX[5],vertY[5],vertZ[5],
-		vertX[5],vertY[5],vertZ[5],
-		vertX[1],vertY[1],vertZ[1],
-		vertX[2],vertY[2],vertZ[2]
-	};
 
-	GLuint textureID = createTexture("Images/top.png");
-	GLuint textureID1 = createTexture("Images/left1.png");
-	GLuint textureID2 = createTexture("Images/left2.png");
-	GLuint textureID3 = createTexture("Images/right.png");
-	GLuint textureID4 = createTexture("Images/bottom.png");
-	GLuint textureID5 = createTexture("Images/middle.png");
-
-	createRectangle (textureID5,vertex_buffer_data,"skybox");
-	createRectangle (textureID3,vertex_buffer_data1,"skybox1");
-	createRectangle (textureID1,vertex_buffer_data2,"skybox2");
-	createRectangle (textureID2,vertex_buffer_data3,"skybox3");
-	createRectangle (textureID,vertex_buffer_data4,"skybox4");
-	createRectangle (textureID4,vertex_buffer_data5,"skybox5");
+	create_skybox();
 
 	float scale=0.7;
 
