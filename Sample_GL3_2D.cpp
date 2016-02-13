@@ -1154,9 +1154,9 @@ void draw (GLFWwindow* window)
 		target_x=objects["player"].x;
 		target_y=objects["player"].y;
 		target_z=objects["player"].z;
-		eye_x=target_x-200*sin(objects["player"].angle_y*M_PI/180);
-		eye_y=target_y+200;
-		eye_z=target_z-200*cos(objects["player"].angle_y*M_PI/180);
+		eye_x=target_x-150*sin(objects["player"].angle_y*M_PI/180);
+		eye_y=target_y+150;
+		eye_z=target_z-150*cos(objects["player"].angle_y*M_PI/180);
 	}
 	if(camera_fps==1){
 		double new_mouse_x,new_mouse_y;
