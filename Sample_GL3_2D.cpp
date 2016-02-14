@@ -116,6 +116,7 @@ float camera_fov=1.3;
 int currentLevel=0;
 int height,width;
 int camera_follow=0;
+int camera_follow_adjust=0;
 int camera_top=0;
 int camera_fps=0;
 float fps_head_offset=0,fps_head_offset_x=0;
@@ -535,6 +536,9 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 
 	if (action == GLFW_RELEASE) {
 		switch (key) {
+			case GLFW_KEY_H:
+				camera_follow_adjust=1-camera_follow_adjust;
+				break;
 			case GLFW_KEY_N:
 				isNight=1-isNight;
 				if(isNight==1){
@@ -1219,9 +1223,53 @@ void draw (GLFWwindow* window)
 		target_x=objects["player"].x;
 		target_y=objects["player"].y;
 		target_z=objects["player"].z;
-		eye_x=target_x-150*sin(objects["player"].angle_y*M_PI/180);
-		eye_y=target_y+150;
-		eye_z=target_z-150*cos(objects["player"].angle_y*M_PI/180);
+		int dist=20;
+		int i,j,p,state1=1;
+		float eye_x_fin;
+		float eye_y_fin;
+		float eye_z_fin;
+		string namex;
+		if(camera_follow_adjust==1){
+			for(dist=0;dist<=130;dist+=30){
+				eye_x=target_x-dist*sin(objects["player"].angle_y*M_PI/180);
+				eye_y=target_y+(250-dist);
+				eye_z=target_z-dist*cos(objects["player"].angle_y*M_PI/180);
+				objects["player"].x=eye_x;
+				objects["player"].y=eye_y;
+				objects["player"].z=eye_z;
+				for(i=0;i<10 && state1==1;i++){
+					for(j=0;j<10 && state1==1;j++){
+						if(gameMap[i][j]==1)
+							continue;
+						for(p=1;p<gameMap[i][j] && state1==1;p++){
+							namex = "floorcube";
+							namex.append(convertInt(i)+convertInt(j)+convertInt(p));
+							if(!check_collision_object("player",namex)){
+								eye_x_fin=eye_x;
+								eye_y_fin=eye_y;
+								eye_z_fin=eye_z;
+							}
+							else{
+								state1=0;
+							}
+						}
+					}
+				}
+				if(state1==0)
+					break;
+			}
+			eye_x=eye_x_fin;
+			eye_y=eye_y_fin;
+			eye_z=eye_z_fin;
+			objects["player"].x=target_x;
+			objects["player"].y=target_y;
+			objects["player"].z=target_z;
+		}
+		else{
+			eye_x=target_x-150*sin(objects["player"].angle_y*M_PI/180);
+			eye_y=target_y+150;
+			eye_z=target_z-150*cos(objects["player"].angle_y*M_PI/180);
+		}
 	}
 	if(camera_fps==1){
 		double new_mouse_x,new_mouse_y;
