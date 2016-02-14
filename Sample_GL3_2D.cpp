@@ -561,6 +561,23 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 				camera_fov=1.3;
 				reshapeWindow(window,700,1400);
 				break;
+			case GLFW_KEY_R:
+				camera_disable_rotation=1;
+				camera_follow=0;
+				camera_fps=0;
+				camera_top=0;
+				camera_radius=800; //Tower view
+				eye_x = -50+camera_radius;
+				eye_z = -50;
+				eye_y=1100;
+				target_x=-50;
+				target_y=0;
+				target_z=-50;
+				fps_head_offset=0;
+				fps_head_offset_x=0;
+				camera_fov=1.3;
+				reshapeWindow(window,700,1400);
+				break;
 			case GLFW_KEY_Y:
 				camera_disable_rotation=0;
 				camera_follow=0;
