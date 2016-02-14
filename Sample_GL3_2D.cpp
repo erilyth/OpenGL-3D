@@ -1088,6 +1088,7 @@ int check_collision(GLFWwindow* window){
 
 float previous_mouse_y,previous_mouse_x;
 float previous_mouse_y2,previous_mouse_x2;
+float previous_mouse_y3,previous_mouse_x3;
 int previous=0;
 
 void create_skybox(){
@@ -1538,14 +1539,12 @@ void draw (GLFWwindow* window)
 	double new_mouse_x,new_mouse_y;
 	glfwGetCursorPos(window,&new_mouse_x,&new_mouse_y);
 	if(left_mouse_clicked==1 && camera_follow==0 && camera_disable_rotation==0){
-		if(new_mouse_x<=700)
-			angle+=1;
-		else
-			angle-=1;
+		angle+=(previous_mouse_x3-new_mouse_x)/10;
 		previous_mouse_x=new_mouse_x;
 		eye_x = -50+camera_radius*cos(angle*M_PI/180);
 		eye_z = -50+camera_radius*sin(angle*M_PI/180);
 	}
+	previous_mouse_x3=new_mouse_x;
 	if(right_mouse_clicked && camera_follow==0 && camera_disable_rotation==0){
 		if (abs(previous_mouse_y-new_mouse_y)>=35)
 			previous_mouse_y = new_mouse_y;
@@ -1968,7 +1967,7 @@ void initGL (GLFWwindow* window, int width, int height)
 					elevatorblock = new_name+"right";
 					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78,(i-5)*150-62,130,150,10,"Models/cube.data","");
 					elevatorblock = new_name+"top";
-					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85,(i-5)*150,130,10,130,"Models/cube.data","");
+					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78+85+2,(i-5)*150,130,10,130,"Models/cube.data","");
 					elevatorblock = new_name+"bottom";
 					createModel (elevatorblock,(j-5)*150,(gameMap[i][j])*150+78-85,(i-5)*150,130,10,130,"Models/cube.data","");
 					objects[new_name].angle_y=180;
