@@ -489,6 +489,7 @@ float camera_radius;
 int left_mouse_clicked;
 int right_mouse_clicked;
 int camera_disable_rotation=0;
+float jump_height;
 
 int player_sprint=0;
 
@@ -709,6 +710,7 @@ void keyboard (GLFWwindow* window, int key, int scancode, int action, int mods)
 						objects["player"].y_speed=13;
 					objects["player"].y+=5;
 					inAir=1;
+					jump_height=objects["player"].y;
 				}
 				break;
 			case GLFW_KEY_ESCAPE:
@@ -1326,6 +1328,8 @@ void draw (GLFWwindow* window)
 
 	if(inAir){
 		objects["player"].y+=objects["player"].y_speed;
+		if(jump_height<objects["player"].y)
+			jump_height=objects["player"].y;
 	}
 	trapTimer+=1;
 	int p;
@@ -1347,6 +1351,9 @@ void draw (GLFWwindow* window)
 		trapTimer=0;
 	objects["player"].y-=5;
 	if(check_collision(window)!=1){
+		if(inAir==0){
+			jump_height=objects["player"].y;
+		}
 		inAir=1;
 		playerObjects["playerhand"].angle_x=0;
 		playerObjects["playerhand2"].angle_x=0;
@@ -1382,6 +1389,15 @@ void draw (GLFWwindow* window)
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
 							inAir=0;
+							if(!super_jump_mode){
+								if(jump_height>=objects["player"].y+240)
+									player_health-=(jump_height-objects["player"].y-240)/30;
+							}
+							if(player_health<=0){
+								currentLevel--;
+								goToNextLevel(window);
+							}
+							jump_height=0;
 							justInAir=1;
 						}
 					}
@@ -1392,6 +1408,15 @@ void draw (GLFWwindow* window)
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
 							inAir=0;
+							if(!super_jump_mode){
+								if(jump_height>=objects["player"].y+240)
+									player_health-=(jump_height-objects["player"].y-240)/30;
+							}
+							if(player_health<=0){
+								currentLevel--;
+								goToNextLevel(window);
+							}
+							jump_height=0;
 							justInAir=1;
 						}
 					}
@@ -1402,6 +1427,15 @@ void draw (GLFWwindow* window)
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
 							inAir=0;
+							if(!super_jump_mode){
+								if(jump_height>=objects["player"].y+240)
+									player_health-=(jump_height-objects["player"].y-240)/30;
+							}
+							if(player_health<=0){
+								currentLevel--;
+								goToNextLevel(window);
+							}
+							jump_height=0;
 							justInAir=1;
 						}
 					}
@@ -1412,6 +1446,15 @@ void draw (GLFWwindow* window)
 							objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 							objects["player"].y_speed=0;
 							inAir=0;
+							if(!super_jump_mode){
+								if(jump_height>=objects["player"].y+240)
+									player_health-=(jump_height-objects["player"].y-240)/30;
+							}
+							if(player_health<=0){
+								currentLevel--;
+								goToNextLevel(window);
+							}
+							jump_height=0;
 							justInAir=1;
 						}
 					}
@@ -1423,6 +1466,15 @@ void draw (GLFWwindow* window)
 						objects["player"].y=objects[name].y+objects[name].y_scale/2+objects["player"].y_scale/2+45+5;
 						objects["player"].y_speed=0;
 						inAir=0;
+						if(!super_jump_mode){
+							if(jump_height>=objects["player"].y+240)
+								player_health-=(jump_height-objects["player"].y-240)/30;
+						}
+						if(player_health<=0){
+							currentLevel--;
+							goToNextLevel(window);
+						}
+						jump_height=0;
 						justInAir=1;
 					}
 					objects["player"].y+=5;
@@ -1764,10 +1816,10 @@ void draw (GLFWwindow* window)
 	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
 	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
-	string score_string = to_string(player_score);
+	string score_string = to_string((int)player_score);
 	const char *score_text=score_string.c_str();
 
-	string health_string = to_string(player_health);
+	string health_string = to_string((int)player_health);
 	const char *health_text=health_string.c_str();
 	// Render font
 	if(camera_fov<=1.4 && camera_fov>=1.2)
