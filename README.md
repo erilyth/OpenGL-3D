@@ -1,3 +1,9 @@
+## Adventure Game
+
+### Abstract
+
+An "island" based block game similar to minecraft in the way it looks (very basic features), except that you will only have a small place to navigate around. You will start off at a point in the level and then you would need to navigate to the finish point. Along the way, you can collect coins to earn points. There would be jump powerups which you can collect which would temporarily allow you to jump higer. You would also need to avoid spike traps which would reduce your health ultimately killing you. At each level you start out with 3 lives and the game ends if you lose them all. 
+
 ### Controls
 
 * UP-DOWN-LEFT-RIGHT keys to move
