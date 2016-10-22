@@ -1861,8 +1861,8 @@ void draw (GLFWwindow* window)
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
 	// send font's MVP and font color to fond shaders
-	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
-	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+	//glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	//glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
 	string score_string = to_string((int)player_score);
 	const char *score_text=score_string.c_str();
@@ -1870,41 +1870,41 @@ void draw (GLFWwindow* window)
 	string health_string = to_string((int)player_health);
 	const char *health_text=health_string.c_str();
 	// Render font
-	if(camera_fov<=1.4 && camera_fov>=1.2)
-		GL3Font.font->Render(score_text);
+	//if(camera_fov<=1.4 && camera_fov>=1.2)
+		//GL3Font.font->Render(score_text);
 
 	Matrices.model = glm::mat4(1.0f);
 	translateText = glm::translate(glm::vec3(-2.8,1.7,0.1));
 	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
-	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
-	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+	//glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	//glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
-	if(camera_fov<=1.4 && camera_fov>=1.2)
-		GL3Font.font->Render(health_text);
+	//if(camera_fov<=1.4 && camera_fov>=1.2)
+	//	GL3Font.font->Render(health_text);
 
 	Matrices.model = glm::mat4(1.0f);
 	translateText = glm::translate(glm::vec3(-4,1.7,0.1));
 	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
-	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
-	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+	//glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	//glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
-	if(camera_fov<=1.4 && camera_fov>=1.2)
-		GL3Font.font->Render("Health: ");
+	//if(camera_fov<=1.4 && camera_fov>=1.2)
+	//	GL3Font.font->Render("Health: ");
 
 	Matrices.model = glm::mat4(1.0f);
 	translateText = glm::translate(glm::vec3(2.35,1.7,0.1));
 	scaleText = glm::scale(glm::vec3(fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov,fontScaleValue/1.5*camera_fov));
 	Matrices.model *= (translateText * scaleText);
 	MVP = Matrices.projection * Matrices.view * Matrices.model;
-	glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
-	glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
+	//glUniformMatrix4fv(GL3Font.fontMatrixID, 1, GL_FALSE, &MVP[0][0]);
+	//glUniform3fv(GL3Font.fontColorID, 1, &fontColor[0]);
 
-	if(camera_fov<=1.4 && camera_fov>=1.2)
-		GL3Font.font->Render("Score: ");
+	//if(camera_fov<=1.4 && camera_fov>=1.2)
+	//	GL3Font.font->Render("Score: ");
 
 }
 
@@ -2202,14 +2202,14 @@ void initGL (GLFWwindow* window, int width, int height)
 	// Initialise FTGL stuff
 	//const char* fontfile = "/home/harsha/Classes/Two-2/Graphics/OGL3Sample2D/GLFW/GL3_Fonts_Textures/arial.ttf";
 	const char* fontfile = "Fonts/OpenSans-Semibold.ttf";
-	GL3Font.font = new FTExtrudeFont(fontfile); // 3D extrude style rendering
+	//GL3Font.font = new FTExtrudeFont(fontfile); // 3D extrude style rendering
 
-	if(GL3Font.font->Error())
-	{
-		cout << "Error: Could not load font `" << fontfile << "'" << endl;
-		glfwTerminate();
-		exit(EXIT_FAILURE);
-	}
+	//if(GL3Font.font->Error())
+	//{
+	//	cout << "Error: Could not load font `" << fontfile << "'" << endl;
+	//	glfwTerminate();
+	//	exit(EXIT_FAILURE);
+	//}
 
 	// Create and compile our GLSL program from the font shaders
 	fontProgramID = LoadShaders( "fontrender.vert", "fontrender.frag" );
@@ -2217,14 +2217,14 @@ void initGL (GLFWwindow* window, int width, int height)
 	fontVertexCoordAttrib = glGetAttribLocation(fontProgramID, "vertexPosition");
 	fontVertexNormalAttrib = glGetAttribLocation(fontProgramID, "vertexNormal");
 	fontVertexOffsetUniform = glGetUniformLocation(fontProgramID, "pen");
-	GL3Font.fontMatrixID = glGetUniformLocation(fontProgramID, "MVP");
-	GL3Font.fontColorID = glGetUniformLocation(fontProgramID, "fontColor");
+	//GL3Font.fontMatrixID = glGetUniformLocation(fontProgramID, "MVP");
+	//GL3Font.fontColorID = glGetUniformLocation(fontProgramID, "fontColor");
 
-	GL3Font.font->ShaderLocations(fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform);
-	GL3Font.font->FaceSize(1);
-	GL3Font.font->Depth(0);
-	GL3Font.font->Outset(0, 0);
-	GL3Font.font->CharMap(ft_encoding_unicode);
+	//GL3Font.font->ShaderLocations(fontVertexCoordAttrib, fontVertexNormalAttrib, fontVertexOffsetUniform);
+	//GL3Font.font->FaceSize(1);
+	//GL3Font.font->Depth(0);
+	//GL3Font.font->Outset(0, 0);
+	//GL3Font.font->CharMap(ft_encoding_unicode);
 
 	cout << "VENDOR: " << glGetString(GL_VENDOR) << endl;
 	cout << "RENDERER: " << glGetString(GL_RENDERER) << endl;
