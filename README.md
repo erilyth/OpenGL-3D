@@ -7,6 +7,8 @@ An "island" based block game similar to minecraft in the way it looks (very basi
 ###Gameplay
 ![Screenshot of Adventure Game](gameplay.gif "Screenshot")
 
+* (The quality of the gif had to be reduced to reduce its size)
+
 ### Controls
 
 * UP-DOWN-LEFT-RIGHT keys to move
